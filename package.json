@@ -1,0 +1,37 @@
+{
+  "name": "@tuana9a/puppeteer-worker",
+  "version": "1.0.0",
+  "description": "Simple puppeteer worker that pull jobs to run",
+  "main": "src/index.js",
+  "scripts": {
+    "test:unit": "jest",
+    "start": "node src/index.js",
+    "test:unit-watch": "jest --watch",
+    "dev": "nodemon src/index.js",
+    "dev:server": "nodemon src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tuana9a/puppeteer-worker.git"
+  },
+  "author": "Tuan Nguyen Minh",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/tuana9a/puppeteer-worker/issues"
+  },
+  "homepage": "https://github.com/tuana9a/puppeteer-worker#readme",
+  "dependencies": {
+    "@tuana9a/nanioc": "0.1.2",
+    "axios": "0.25.0",
+    "dotenv": "16.0.0",
+    "form-data": "4.0.0",
+    "puppeteer": "13.5.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.13.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "jest": "27.5.1",
+    "nodemon": "2.0.15"
+  }
+}
