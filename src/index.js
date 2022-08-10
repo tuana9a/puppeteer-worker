@@ -1,3 +1,5 @@
+const fs = require("fs");
+
 const nanioc = require("@tuana9a/nanioc");
 const errors = require("./common/errors");
 
@@ -10,6 +12,7 @@ const Config = require("./common/config");
 const PuppeteerManager = require("./controllers/puppeteer-manager");
 const JobManager = require("./controllers/job-manager");
 const HttpPollJobsService = require("./controllers/http-poll-jobs.service");
+const JobTemplateDb = require("./controllers/job-template.db");
 
 require("dotenv").config();
 
@@ -23,34 +26,67 @@ async function main() {
   ioc.addBean(JobRunner, "jobRunner");
   ioc.addBean(JobManager, "jobManager");
   ioc.addBean(HttpPollJobsService, "httpPollJobsService");
+  ioc.addBean(JobTemplateDb, "jobTemplateDb");
   ioc.addBean(Loop, "loop");
   ioc.di();
 
   const config = ioc.getBean("config").getInstance();
+  config.loadFromEnv(process.env);
+
   const logger = ioc.getBean("logger").getInstance();
+  logger.use(config.log.dest);
+  logger.setLogDir(config.log.dir);
+
+  // make sure tmp dir exists
+  if (!fs.existsSync(config.tmp.dir)) {
+    fs.mkdirSync(config.tmp.dir);
+  }
+
+  // make sure tmp dir exists
+  if (!fs.existsSync(config.log.dir)) {
+    fs.mkdirSync(config.log.dir);
+  }
+
+  logger.info(config);
+
   const puppeteerManager = ioc.getBean("puppeteerManager").getInstance();
+  await puppeteerManager.launch(config.puppeteer.launchOption);
+
   const jobManager = ioc.getBean("jobManager").getInstance();
   // TODO: need to support multiplte way to get the jobs
   const jobService = ioc.getBean("httpPollJobsService").getInstance();
   const jobRunner = ioc.getBean("jobRunner").getInstance();
+  const jobTemplateDb = ioc.getBean("jobTemplateDb").getInstance();
 
-  config.loadFromEnv(process.env);
-  config.loadJobConfig();
+  if (config.job.info.url) {
+    try {
+      await jobTemplateDb.downloadFromInfo(
+        config.job.info.url,
+        config.job.dir,
+        {
+          headers: {
+            Authorization: `Bearer ${config.job.accessToken}`,
+          },
+        },
+      );
+    } catch (err) {
+      logger.error(err);
+    }
+  }
 
-  logger.use(config.log.dest);
-  logger.info(config);
-  logger.info(process.env);
-
-  await puppeteerManager.launch(config.puppeteer.launchOption);
+  jobTemplateDb.loadFromDir(config.job.dir, config.job.import.prefix);
 
   jobManager.setJobService(jobService);
   jobManager.registerHandler(async (body) => {
     try {
-      const jobMappers = config.getJobMappers();
       const jobId = body.id;
       const jobInput = body.input;
       const jobCtx = body.ctx;
-      const job = jobMappers.get(jobId);
+      const job = jobTemplateDb.get(jobId);
+
+      logger.info(
+        `Doing job: id="${jobId}" input="${JSON.stringify(jobInput)}" ctx="${JSON.stringify(jobCtx)}"`,
+      );
 
       if (!job) {
         const msg = `Job not found "${jobId}"`;
@@ -76,7 +112,7 @@ async function main() {
       return { success: true, result: result };
     } catch (err) {
       logger.error(err);
-      return { success: false, err: err };
+      return { success: false, err: err.message };
     }
   });
 

@@ -12,17 +12,17 @@ class Logger {
   handlers;
 
   constructor() {
-    this.handler = this.csLog;
+    this.handler = this._cs;
     this.handlers = new Map();
-    this.handlers.set("cs", this.csLog.bind(this));
-    this.handlers.set("fs", this.fsLog.bind(this));
+    this.handlers.set("cs", this._cs.bind(this));
+    this.handlers.set("fs", this._fs.bind(this));
   }
 
   /**
    * @param {LogObject} object
    */
   // eslint-disable-next-line class-methods-use-this
-  csLog(object) {
+  _cs(object) {
     const now = new Date();
     let { data } = object;
     if (typeof data === "object") {
@@ -38,11 +38,15 @@ class Logger {
   /**
    * @param {LogObject} object
    */
-  fsLog(object) {
+  _fs(object) {
     const now = new Date();
-    const record = `${this.datetimeUtils.getFull(now)} [${object.type}] ${
-      object.data
-    }\n`;
+    let { data } = object;
+    if (typeof data === "object") {
+      data = JSON.stringify(data);
+    }
+    const record = `${this.datetimeUtils.getFull(now)} [${
+      object.type
+    }] ${data}\n`;
     const filepath = `${this.logDir + this.datetimeUtils.getDate(now)}.log`;
     fs.appendFileSync(filepath, record);
   }

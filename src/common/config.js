@@ -1,7 +1,4 @@
-/* eslint-disable global-require */
-/* eslint-disable import/no-dynamic-require */
 /* eslint-disable array-bracket-spacing */
-const fs = require("fs");
 
 const ppLaunchOptions = new Map();
 ppLaunchOptions.set("default", {
@@ -46,52 +43,39 @@ class Config {
   loadFromEnv(env) {
     // start assign value
     this.tmp = {};
-    this.tmp.dir = "./tmp/";
+    this.tmp.dir = env.TMP_DIR || "./.tmp/";
 
     // config logging
     this.log = {};
     this.log.dest = env.LOG_DESTINATION || "cs";
-    this.log.dir = "./logs/";
+    this.log.dir = env.LOG_DIR || "./logs/";
 
     // security
     this.security = {};
     this.security.secret = env.SECRET || "";
 
     // poll jobs
-    this.repeatPollJobsAfter = env.REPEAT_POLL_JOBS_AFFER || 3000; // default 3s repeat process
-    this.repeatPollJobsAfter = parseInt(this.repeatPollJobsAfter);
-    this.httpPollJobsUrl = env.HTTP_POLL_JOBS_URL;
-    this.httpPollJobsAccessToken = env.HTTP_POLL_JOBS_ACCESS_TOKEN;
-    this.httpSubmitResultUrl = env.HTTP_SUBMIT_RESULT_URL;
-
-    this.maxTryCount = env.MAX_TRY_COUNT || 10;
-    this.maxTryCount = parseInt(this.maxTryCount);
-
-    this.jobMappers = new Map();
-    this.jobConfig = env.JOB_CONF || env.JOB_CONFIG;
+    this.job = {};
+    this.job.dir = env.JOB_DIR || this.tmp.dir || "./.tmp/";
+    this.job.import = {};
+    this.job.import.prefix = env.JOB_IMPORT_PREFIX || "../../";
+    this.job.baseUrl = env.JOB_BASE_URL;
+    this.job.accessToken = env.JOB_ACCESS_TOKEN;
+    this.job.poll = {};
+    this.job.poll.url = env.JOB_POLL_URL || `${this.job.baseUrl}/poll`;
+    this.job.info = {};
+    this.job.info.url = env.JOB_INFO_URL || `${this.job.baseUrl}/info`;
+    this.job.poll.repeatAfter = parseInt(env.JOB_REPEAT_POLL_AFFER || 3000); // default 3s repeat process
+    this.job.submit = {};
+    this.job.submit.url = env.JOB_SUBMIT_URL || `${this.job.baseUrl}/result`;
+    this.job.maxTry = {};
+    this.job.maxTry.count = parseInt(env.JOB_MAX_TRY_COUNT || 10);
 
     // puppeteer
     this.puppeteer = {};
     const defaultLaunchOption = ppLaunchOptions.get("default");
     const launchOption = ppLaunchOptions.get(env.PUPPETEER_MODE);
     this.puppeteer.launchOption = launchOption || defaultLaunchOption;
-  }
-
-  loadJobConfig() {
-    const config = JSON.parse(fs.readFileSync(this.jobConfig, { flag: "r" }));
-    const mappers = this.jobMappers;
-    const configMappers = config.mappers;
-    for (const key of Object.keys(configMappers)) {
-      const modulePath = configMappers[key];
-      const module = require(modulePath);
-      for (const subKey of Object.keys(module)) {
-        mappers.set(`${key}/${subKey}`, module[subKey]);
-      }
-    }
-  }
-
-  getJobMappers() {
-    return this.jobMappers;
   }
 }
 

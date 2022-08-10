@@ -1,6 +1,6 @@
 const axios = require("axios");
 
-const axiosInstance = axios.default.create();
+const _axios = axios.default.create();
 
 class HttpPollJobsService {
   config;
@@ -28,13 +28,13 @@ class HttpPollJobsService {
 
     loop.infinity(async () => {
       try {
-        const response = await axiosInstance
-          .get(config.httpPollJobsUrl, {
+        const response = await _axios
+          .get(config.job.poll.url, {
             headers: {
-              Authorization: `Bearer ${config.httpPollJobsAccessToken}`,
+              Authorization: `Bearer ${config.job.accessToken}`,
             },
           })
-          .then((data) => data.data);
+          .then((res) => res.data);
 
         const jobs = response.data;
 
@@ -43,12 +43,12 @@ class HttpPollJobsService {
 
           logger.info(result);
 
-          if (config.httpSubmitResultUrl) {
-            axiosInstance
-              .post(config.httpSubmitResultUrl, JSON.stringify(result), {
+          if (config.job.submit.url) {
+            _axios
+              .post(config.job.submit.url, JSON.stringify(result), {
                 headers: {
                   "Content-Type": "application/json",
-                  Authorization: `Bearer ${config.httpPollJobsAccessToken}`,
+                  Authorization: `Bearer ${config.job.accessToken}`,
                 },
               })
               .catch((err) => logger.error(err));
@@ -57,7 +57,7 @@ class HttpPollJobsService {
       } catch (err) {
         logger.error(err);
       }
-    }, config.repeatPollJobsAfter);
+    }, config.job.poll.repeatAfter);
   }
 }
 

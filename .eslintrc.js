@@ -21,5 +21,6 @@ module.exports = {
     "object-curly-newline": "off",
     "object-shorthand": "off",
     "operator-linebreak": "warn",
+    "no-underscore-dangle": "off",
   },
 };

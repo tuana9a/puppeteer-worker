@@ -3,7 +3,7 @@ const axios = require("axios");
 const FormData = require("form-data");
 const errors = require("../common/errors");
 
-const axiosInstance = axios.default.create();
+const _axios = axios.default.create();
 
 class JobRunner {
   jobValidation;
@@ -33,7 +33,7 @@ class JobRunner {
       input,
       page,
       fs,
-      axios: axiosInstance,
+      axios: _axios,
       FormData,
     };
 

@@ -106,4 +106,3 @@ dist
 # @tuana9a
 *.local*
 *.tmp*
-jobs.conf.json

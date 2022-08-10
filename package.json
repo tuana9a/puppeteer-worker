@@ -1,5 +1,5 @@
 {
-  "name": "@tuana9a/puppeteer-worker",
+  "name": "puppeteer-worker",
   "version": "1.0.0",
   "description": "Simple puppeteer worker that pull jobs to run",
   "main": "src/index.js",
