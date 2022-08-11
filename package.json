@@ -1,6 +1,6 @@
 {
   "name": "puppeteer-worker",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Simple puppeteer worker that pull jobs to run",
   "main": "src/index.js",
   "scripts": {
@@ -9,6 +9,19 @@
     "test:unit-watch": "jest --watch",
     "dev": "nodemon src/index.js",
     "dev:server": "nodemon src/index.js"
+  },
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "browser": {
+        "require": "./src/index.js",
+        "default": "./src/index.js"
+      },
+      "default": {
+        "require": "./src/index.js",
+        "default": "./src/index.js"
+      }
+    }
   },
   "repository": {
     "type": "git",
@@ -23,7 +36,6 @@
   "dependencies": {
     "@tuana9a/nanioc": "0.1.2",
     "axios": "0.25.0",
-    "dotenv": "16.0.0",
     "form-data": "4.0.0",
     "puppeteer": "13.5.1"
   },
@@ -33,5 +45,18 @@
     "eslint-plugin-import": "^2.26.0",
     "jest": "27.5.1",
     "nodemon": "2.0.15"
-  }
+  },
+  "directories": {
+    "example": "examples"
+  },
+  "keywords": [
+    "puppeteer-worker",
+    "puppeteer",
+    "worker",
+    "automation",
+    "selenium"
+  ],
+  "contributors": [
+    "Tuan Nguyen Minh (https://github.com/tuana9a)"
+  ]
 }
