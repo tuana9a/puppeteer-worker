@@ -15,3 +15,11 @@ class CanNotGetPage extends Error {
 }
 
 module.exports.CanNotGetPage = CanNotGetPage;
+
+class PuppeteerDisconnected extends Error {
+  constructor() {
+    super("Puppeteer is disconnected");
+  }
+}
+
+module.exports.PuppeteerDisconnected = PuppeteerDisconnected;

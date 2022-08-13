@@ -1,4 +1,5 @@
 /* eslint-disable array-bracket-spacing */
+const fs = require("fs");
 
 const ConfigTemplate = require("./config-template");
 const options = require("./puppeteer-launch-options");
@@ -62,7 +63,7 @@ class Config {
     this.puppeteer.launchOption = options.get(env.PUPPETEER_MODE);
   }
 
-  loadFromObject(object = ConfigTemplate.TEMPLATE) {
+  loadFromObject(object = ConfigTemplate) {
     if (!object) {
       return;
     }
@@ -72,19 +73,25 @@ class Config {
     this.log.dest = object.logDest || object.logDestination || "cs";
     this.log.dir = object.logDir || "./logs/";
 
-    this.security.secret = object.secret || "";
+    this.security.secret = object.secret;
 
     this.job.dir = object.jobDir || this.tmp.dir || "./.tmp/";
-    this.job.import.prefix = object.jobImportPregix || "../../";
-    this.job.baseUrl = object.jobBaseUrl;
+    this.job.import.prefix = object.jobImportPrefix || "../../";
+    this.job.baseUrl = object.jobBaseUrl || "http://localhost:8080/api/jobs";
     this.job.accessToken = object.jobAccessToken;
     this.job.poll.url = object.jobPollUrl || `${this.job.baseUrl}/poll`;
     this.job.info.url = object.jobInfoUrl || `${this.job.baseUrl}/info`;
-    this.job.poll.repeatAfter = parseInt(object.jobPollRepeatAfter || 3000); // default 3s repeat process
+    this.job.poll.repeatAfter = parseInt(object.jobPollRepeatAfter || 5000); // default 5s repeat process
     this.job.submit.url = object.jobSubmitUrl || `${this.job.baseUrl}/result`;
     this.job.maxTry.count = parseInt(object.jobMaxTryCount || 10);
 
     this.puppeteer.launchOption = options.get(object.puppeteerMode);
+  }
+
+  loadFromFile(filepath = "config.json") {
+    const data = fs.readFileSync(filepath, { flag: "r", encoding: "utf-8" });
+    const object = JSON.parse(data);
+    this.loadFromObject(object);
   }
 }
 

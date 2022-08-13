@@ -51,7 +51,7 @@ class JobRunner {
       try {
         output = await task.run(ctx);
       } catch (err) {
-        logger.error(err);
+        logger.error(err, "jobRunner.run > for (const task of tasks)");
         output.isServerError = true;
         output.messages.push({
           name: err.name,

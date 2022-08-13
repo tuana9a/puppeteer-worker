@@ -12,7 +12,7 @@ class ConfigTemplate {
   jobPollUrl: String = "http://localhost:8080/api/jobs/poll";
   jobPollRepeatAfter: String = 5000;
 
-  jobInfoUurl: String = "http://localhost:8080/api/jobs/info";
+  jobInfoUrl: String = "http://localhost:8080/api/jobs/info";
   jobSubmitUrl: String = "http://localhost:8080/api/jobs/result";
   jobMaxTryCount: 10;
 
@@ -20,6 +20,6 @@ class ConfigTemplate {
 }
 
 export class PuppeteerWorker {
-  constructor(__config: ConfigTemplate);
-  async start(): void;
+  constructor();
+  async start(__config: ConfigTemplate | void): void;
 }

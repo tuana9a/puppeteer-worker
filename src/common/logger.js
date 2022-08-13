@@ -21,7 +21,6 @@ class Logger {
   /**
    * @param {LogObject} object
    */
-  // eslint-disable-next-line class-methods-use-this
   _cs(object) {
     const now = new Date();
     let { data } = object;
@@ -73,15 +72,9 @@ class Logger {
   /**
    * @param {Error} err
    */
-  error(err) {
+  error(err, at = null) {
+    this.log({ type: "ERROR", data: at });
     this.log({ type: "ERROR", data: err.stack });
-  }
-
-  /**
-   * @param {Error} err
-   */
-  err(err) {
-    this.error(err);
   }
 
   /**

@@ -10,31 +10,74 @@ const DateTimeUtils = require("./common/datetime.utils");
 const JobValidation = require("./validations/job.validatation");
 const Config = require("./common/config");
 const PuppeteerManager = require("./controllers/puppeteer-manager");
-const JobManager = require("./controllers/job-manager");
 const HttpPollJobsService = require("./controllers/http-poll-jobs.service");
-const JobTemplateDb = require("./controllers/job-template.db");
+const JobTemplateDb = require("./db/job-template.db");
 const ConfigTemplate = require("./common/config-template");
 
 class PuppeteerWorker {
-  constructor(__config = ConfigTemplate.TEMPLATE) {
+  static _ignoreDeps = ["ioc"];
+
+  logger;
+
+  config;
+
+  puppeteerManager;
+
+  httpPollJobsService;
+
+  jobTemplateDb;
+
+  jobRunner;
+
+  constructor() {
     const ioc = new nanioc.IOCContainer();
-    this.ioc = ioc;
     ioc.addBean(Logger, "logger");
     ioc.addBean(DateTimeUtils, "datetimeUtils");
     ioc.addBean(JobValidation, "jobValidation");
     ioc.addBean(Config, "config");
     ioc.addBean(PuppeteerManager, "puppeteerManager");
     ioc.addBean(JobRunner, "jobRunner");
-    ioc.addBean(JobManager, "jobManager");
     ioc.addBean(HttpPollJobsService, "httpPollJobsService");
     ioc.addBean(JobTemplateDb, "jobTemplateDb");
     ioc.addBean(Loop, "loop");
+    ioc.addBeanWithoutClass(this, "puppeteerWorker");
     ioc.di();
+  }
 
-    const config = ioc.getBean("config").getInstance();
+  getConfig() {
+    return this.config;
+  }
+
+  getLogger() {
+    return this.logger;
+  }
+
+  getPuppeteerManager() {
+    return this.puppeteerManager;
+  }
+
+  getHttpPollJobService() {
+    return this.httpPollJobsService;
+  }
+
+  getJobTemplateDb() {
+    return this.jobTemplateDb;
+  }
+
+  getJobRunner() {
+    return this.jobRunner;
+  }
+
+  async start(__config = ConfigTemplate) {
+    const config = this.getConfig();
+    const logger = this.getLogger();
+    const puppeteerManager = this.getPuppeteerManager();
+    // TODO: need to support multiple way to get the jobs
+    const jobService = this.getHttpPollJobService();
+    const jobRunner = this.getJobRunner();
+    const jobTemplateDb = this.getJobTemplateDb();
+
     config.loadFromObject(__config);
-
-    const logger = ioc.getBean("logger").getInstance();
     logger.use(config.log.dest);
     logger.setLogDir(config.log.dir);
 
@@ -49,29 +92,8 @@ class PuppeteerWorker {
     }
 
     logger.info(config);
-  }
 
-  getIoc() {
-    return this.ioc;
-  }
-
-  getConfig() {
-    return this.config;
-  }
-
-  async start() {
-    const ioc = this.getIoc();
-    const config = ioc.getBean("config").getInstance();
-    const logger = ioc.getBean("logger").getInstance();
-
-    const puppeteerManager = ioc.getBean("puppeteerManager").getInstance();
     await puppeteerManager.launch(config.puppeteer.launchOption);
-
-    const jobManager = ioc.getBean("jobManager").getInstance();
-    // TODO: need to support multiplte way to get the jobs
-    const jobService = ioc.getBean("httpPollJobsService").getInstance();
-    const jobRunner = ioc.getBean("jobRunner").getInstance();
-    const jobTemplateDb = ioc.getBean("jobTemplateDb").getInstance();
 
     if (config.job.info.url) {
       try {
@@ -85,14 +107,13 @@ class PuppeteerWorker {
           },
         );
       } catch (err) {
-        logger.error(err);
+        logger.error(err, "jobTemplateDb.downloadFromInfo");
       }
     }
 
     jobTemplateDb.loadFromDir(config.job.dir, config.job.import.prefix);
 
-    jobManager.setJobService(jobService);
-    jobManager.registerHandler(async (body) => {
+    jobService.start(async (body) => {
       try {
         const jobId = body.id;
         const jobInput = body.input;
@@ -128,12 +149,10 @@ class PuppeteerWorker {
 
         return { success: true, result: result };
       } catch (err) {
-        logger.error(err);
+        logger.error(err, "jobHandler");
         return { success: false, err: err.message };
       }
     });
-
-    jobManager.start();
   }
 }
 

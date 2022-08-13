@@ -1,5 +1,7 @@
 const puppeteer = require("puppeteer");
 
+const errors = require("../common/errors");
+
 class PuppeteerManager {
   logger;
 
@@ -14,7 +16,7 @@ class PuppeteerManager {
     this.browser = await puppeteer.launch(launchOption);
     const logger = this.getLogger();
     this.browser.on("disconnected", () => {
-      logger.error(new Error("puppeteer browser disconnected"));
+      logger.error(new errors.PuppeteerDisconnected());
       setTimeout(() => process.exit(0), 1000);
     });
     return this;

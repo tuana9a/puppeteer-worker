@@ -1,14 +1,11 @@
 {
   "name": "puppeteer-worker",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Simple puppeteer worker that pull jobs to run",
   "main": "src/index.js",
   "scripts": {
-    "test:unit": "jest",
     "start": "node src/index.js",
-    "test:unit-watch": "jest --watch",
-    "dev": "nodemon src/index.js",
-    "dev:server": "nodemon src/index.js"
+    "dev": "nodemon src/index.js"
   },
   "types": "./src/index.d.ts",
   "exports": {
@@ -43,7 +40,6 @@
     "eslint": "^8.13.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.26.0",
-    "jest": "27.5.1",
     "nodemon": "2.0.15"
   },
   "directories": {

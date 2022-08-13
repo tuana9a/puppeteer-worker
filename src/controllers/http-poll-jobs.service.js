@@ -27,35 +27,45 @@ class HttpPollJobsService {
     const logger = this.getLogger();
 
     loop.infinity(async () => {
-      try {
-        const response = await _axios
-          .get(config.job.poll.url, {
-            headers: {
-              Authorization: `Bearer ${config.job.accessToken}`,
-            },
-          })
-          .then((res) => res.data);
+      const baseErrAt = "httpPollJobService.start > loop.infinity";
+      const response = await _axios
+        .get(config.job.poll.url, {
+          headers: {
+            Authorization: `Bearer ${config.job.accessToken}`,
+          },
+        })
+        .then((res) => res.data)
+        .catch((err) => {
+          logger.error(err, `${baseErrAt} > get jobs`);
+          return { data: [] };
+        });
 
-        const jobs = response.data;
+      const jobs = response.data;
 
-        for (const job of jobs) {
-          const result = await handler(job);
+      for (const job of jobs) {
+        let result = null;
+        try {
+          result = await handler(job);
 
           logger.info(result);
-
-          if (config.job.submit.url) {
-            _axios
-              .post(config.job.submit.url, JSON.stringify(result), {
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${config.job.accessToken}`,
-                },
-              })
-              .catch((err) => logger.error(err));
-          }
+        } catch (err) {
+          result = {
+            success: false,
+            err: { message: err.message, stack: err.stack },
+          };
+          logger.error(err, `${baseErrAt} > for : jobs > handler(job)`);
         }
-      } catch (err) {
-        logger.error(err);
+
+        if (config.job.submit.url) {
+          _axios
+            .post(config.job.submit.url, JSON.stringify(result), {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${config.job.accessToken}`,
+              },
+            })
+            .catch((err) => logger.error(err, `${baseErrAt} > post result`));
+        }
       }
     }, config.job.poll.repeatAfter);
   }
