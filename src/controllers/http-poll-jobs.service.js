@@ -29,11 +29,17 @@ class HttpPollJobsService {
     loop.infinity(async () => {
       const baseErrAt = "httpPollJobService.start > loop.infinity";
       const response = await _axios
-        .get(config.job.poll.url, {
-          headers: {
-            Authorization: `Bearer ${config.job.accessToken}`,
+        .post(
+          config.controlPlaneUrl,
+          {
+            cmd: "poll-job",
           },
-        })
+          {
+            headers: {
+              Authorization: `Bearer ${config.accessToken}`,
+            },
+          },
+        )
         .then((res) => res.data)
         .catch((err) => {
           logger.error(err, `${baseErrAt} > get jobs`);
@@ -56,18 +62,23 @@ class HttpPollJobsService {
           logger.error(err, `${baseErrAt} > for : jobs > handler(job)`);
         }
 
-        if (config.job.submit.url) {
-          _axios
-            .post(config.job.submit.url, JSON.stringify(result), {
+        _axios
+          .post(
+            config.controlPlaneUrl,
+            JSON.stringify({
+              cmd: "submit-result",
+              result: result,
+            }),
+            {
               headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${config.job.accessToken}`,
+                Authorization: `Bearer ${config.accessToken}`,
               },
-            })
-            .catch((err) => logger.error(err, `${baseErrAt} > post result`));
-        }
+            },
+          )
+          .catch((err) => logger.error(err, `${baseErrAt} > post result`));
       }
-    }, config.job.poll.repeatAfter);
+    }, config.repeatPollJobsAfter);
   }
 }
 

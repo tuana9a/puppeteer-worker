@@ -1,6 +1,6 @@
 # puppeteer-worker
 
-a simple [puppeteer](https://github.com/puppeteer/puppeteer)-worker will poll jobs every seconds from server to run then submit result back
+a simple [puppeteer](https://github.com/puppeteer/puppeteer) worker will poll jobs every seconds from server to run then submit result back
 
 # Installing
 
@@ -17,20 +17,33 @@ basic
 ```js
 const { PuppeteerWorker } = require("puppeteer-worker");
 
-new PuppeteerWorker().start({
-  // tmpDir: "./.tmp/", // tmp dir for storing things like jobs files
-  // logDest: "cs", // "fs" or "cs"
-  // logDir: "./logs/",
-  // secret: "yoursecret",
-  // jobDir: "./.tmp/",
-  // jobImportPrefix: "../../", // this is complicated, the relative path from job-template.db.js
-  // jobBaseUrl: "http://localhost:8080/api/jobs",
-  // jobAccessToken: "tuana9a@gmail.com",
-  // jobPollUrl: "http://localhost:8080/api/jobs/poll",
-  // jobPollRepeatAfter: 5_000, // 5 seconds
-  // jobInfoUrl: "http://localhost:8080/api/jobs/info",
-  // jobSubmitUrl: "http://localhost:8080/api/jobs/result",
-  // jobMaxTryCount: 10,
-  // puppeteerMode: "headless", // "headless" or "visible"
-});
+new PuppeteerWorker({
+  // tmpDir: "./.tmp/", // tmp dir for storing things
+  // logDest: "cs", // log destinantion can be file or console: "fs", "cs"
+  // logDir: "./logs/", log directory
+  // secret: "tuana9a", // worker secret
+  // accessToken: "tuana9a", // control plane access token
+  // maxTry: 10,
+  // jobDir: "./.tmp/", // job dir default is equal to tmpDir
+  // jobImportPrefix: "../../", // relative path from job-template.db.js
+  // controlPlaneUrl: "http://localhost:8080/api/jobs",
+  // repeatPollJobsAfter: 5000, // 5 seconds
+  // puppeteerMode: "headless", // "default", "headless", "visible", "docker"
+}).start();
 ```
+
+start with bash
+
+```bash
+./node_modules/.bin/puppeteer-worker
+```
+
+see help for details
+
+```bash
+./node_modules/.bin/puppeteer-worker --help
+```
+
+## **Note**
+
+for config.jobImportPrefix see [troubleshooting](./troubleshooting.md#configjobimportprefix-explaination)

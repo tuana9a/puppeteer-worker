@@ -1,24 +1,14 @@
 const puppeteer = require("puppeteer");
 
-const errors = require("../common/errors");
-
 class PuppeteerManager {
-  logger;
-
-  getLogger() {
-    return this.logger;
-  }
-
   /**
-   * @param {puppeteer.LaunchOptions} launchOption
+   * @param {puppeteerLaunchOptions} launchOption
    */
-  async launch(launchOption) {
+  async launch(launchOption, onDisconnect = null) {
     this.browser = await puppeteer.launch(launchOption);
-    const logger = this.getLogger();
-    this.browser.on("disconnected", () => {
-      logger.error(new errors.PuppeteerDisconnected());
-      setTimeout(() => process.exit(0), 1000);
-    });
+    if (onDisconnect) {
+      this.browser.on("disconnected", onDisconnect);
+    }
     return this;
   }
 

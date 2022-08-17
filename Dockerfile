@@ -33,6 +33,6 @@ RUN npm install --only=production
 
 COPY src/ src/
 
-COPY jobs.conf.json .
+RUN npm install .
 
-CMD ["node", "src/index.js"]
+CMD ["./node_modules/.bin/puppeteer-worker", ""]

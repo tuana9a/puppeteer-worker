@@ -2,11 +2,6 @@
 /* eslint-disable import/no-dynamic-require */
 const fs = require("fs");
 const path = require("path");
-const axios = require("axios");
-
-const downloadUtils = require("../common/download.utils");
-
-const _axios = axios.default.create();
 
 class JobTemplateDb {
   static _ignoreDeps = ["db"];
@@ -25,26 +20,6 @@ class JobTemplateDb {
 
   getLogger() {
     return this.logger;
-  }
-
-  async download(url, out, axiosConfig = {}) {
-    return downloadUtils.downloadFile(url, out, axiosConfig);
-  }
-
-  async downloadFromInfo(url, outDir, axiosConfig = {}) {
-    const logger = this.getLogger();
-    const response = await _axios.get(url, axiosConfig).then((res) => res.data);
-    const jobInfos = response.data;
-
-    for (const info of jobInfos) {
-      const { key, downloadUrl, fileName } = info;
-      logger.info(`downloading job: "${key}"`);
-      await this.download(
-        downloadUrl,
-        path.join(outDir, fileName),
-        axiosConfig,
-      );
-    }
   }
 
   loadFromFile(modulePath, jobKey, importPrefix = "") {

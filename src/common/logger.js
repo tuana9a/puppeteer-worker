@@ -73,7 +73,7 @@ class Logger {
    * @param {Error} err
    */
   error(err, at = null) {
-    this.log({ type: "ERROR", data: at });
+    this.log({ type: "ERROR", data: `at ${at}` });
     this.log({ type: "ERROR", data: err.stack });
   }
 

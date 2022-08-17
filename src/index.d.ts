@@ -1,25 +1,37 @@
-class ConfigTemplate {
+import {
+  LaunchOptions,
+  BrowserLaunchArgumentOptions,
+  BrowserConnectOptions,
+} from "puppeteer";
+
+class Config {
   tmpDir: String = "./.tmp/";
-  logDest: String = "fs";
+
+  logDest: String = "cs";
   logDir: String = "./logs/";
-  secret: String = "yoursecret";
+
+  secret: String = undefined;
+  accessToken: String = undefined;
+
+  maxTry: Number = 10;
 
   jobDir: String = "./.tmp/";
-  jobImportPrefix: "../../";
-  jobBaseUrl: String = "http://localhost:8080/api/jobs";
-  jobAccessToken: String = "yoursecret";
+  jobImportPrefix: String = "";
 
-  jobPollUrl: String = "http://localhost:8080/api/jobs/poll";
-  jobPollRepeatAfter: String = 5000;
+  controlPlaneUrl: String = undefined;
+  repeatPollJobsAfter: Number = 5000;
 
-  jobInfoUrl: String = "http://localhost:8080/api/jobs/info";
-  jobSubmitUrl: String = "http://localhost:8080/api/jobs/result";
-  jobMaxTryCount: 10;
-
-  puppeteerMode: "headless";
+  puppeteerMode: String = "default";
+  puppeteerLaunchOption: LaunchOptions &
+    BrowserLaunchArgumentOptions &
+    BrowserConnectOptions & {
+      product?: Product;
+      extraPrefsFirefox?: Record<string, unknown>;
+    };
 }
 
 export class PuppeteerWorker {
-  constructor();
-  async start(__config: ConfigTemplate | void): void;
+  constructor(__config?: Config);
+  async start(__config?: Config): void;
+  getConfig(): Config;
 }

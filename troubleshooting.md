@@ -1,6 +1,6 @@
-# config.importPrefix explaination
+# config.jobImportPrefix explaination
 
-the structure of project look like
+The project structure look like
 
 ```
 | -- .tmp/
@@ -13,12 +13,38 @@ the structure of project look like
     ...etc
 ```
 
-so for job-template.db.js `import` or **require(modulepath)** it need to add some
+so if `job-template.db.js` needs to **import** or **require(modulepath)** it need to add prefix to the module path, for example
 
-prefix before calling `require` in the example above it can bee `../../` + `.tmp` then the module file
+```js
+// job-template.db.js
+const job1 = require("./.tmp/job1"); // not work
+
+// adding "../../"
+const job1 = require("../../" + ".tmp/job1"); // work
+```
 
 if you install `puppeteer-worker` then propably in will be in your `node_modules` folder, then the prefix must be different.
 
 There will be much more **"`../`"**
+
+```
+| -- .tmp/
+|      | -- job1.js
+|      | -- job2.js
+| -- node_modules/
+        | -- puppeteer-worker
+                | -- src/
+                    | -- common/
+                    | -- db/
+                    |     | -- job-template.db.js
+                    ...etc
+```
+
+```js
+const job1 = require("../../" + ".tmp/job1"); // not work anymore
+
+// adding more "../../"
+const job1 = require("../../../../" + ".tmp/job1"); // work
+```
 
 I suggest using absolute path like `~/Projects/puppeteer-worker` or `/home/tuana9a/Projects/puppeteer-worker` for simplicity

@@ -1,7 +1,10 @@
 const fs = require("fs");
+const path = require("path");
+const axios = require("axios");
 
 const nanioc = require("@tuana9a/nanioc");
 const errors = require("./common/errors");
+const configUtils = require("./common/config.utils");
 
 const Loop = require("./common/loop");
 const JobRunner = require("./controllers/job-runner");
@@ -12,11 +15,9 @@ const Config = require("./common/config");
 const PuppeteerManager = require("./controllers/puppeteer-manager");
 const HttpPollJobsService = require("./controllers/http-poll-jobs.service");
 const JobTemplateDb = require("./db/job-template.db");
-const ConfigTemplate = require("./common/config-template");
+const downloadUtils = require("./common/download.utils");
 
 class PuppeteerWorker {
-  static _ignoreDeps = ["ioc"];
-
   logger;
 
   config;
@@ -29,8 +30,8 @@ class PuppeteerWorker {
 
   jobRunner;
 
-  constructor() {
-    const ioc = new nanioc.IOCContainer();
+  constructor(__config) {
+    const ioc = new nanioc.IOCContainer({ ignoreMissingBean: true });
     ioc.addBean(Logger, "logger");
     ioc.addBean(DateTimeUtils, "datetimeUtils");
     ioc.addBean(JobValidation, "jobValidation");
@@ -42,6 +43,10 @@ class PuppeteerWorker {
     ioc.addBean(Loop, "loop");
     ioc.addBeanWithoutClass(this, "puppeteerWorker");
     ioc.di();
+    if (__config) {
+      const config = this.getConfig();
+      configUtils.loadFromObject(__config, config);
+    }
   }
 
   getConfig() {
@@ -68,7 +73,7 @@ class PuppeteerWorker {
     return this.jobRunner;
   }
 
-  async start(__config = ConfigTemplate) {
+  async start(__config) {
     const config = this.getConfig();
     const logger = this.getLogger();
     const puppeteerManager = this.getPuppeteerManager();
@@ -77,41 +82,69 @@ class PuppeteerWorker {
     const jobRunner = this.getJobRunner();
     const jobTemplateDb = this.getJobTemplateDb();
 
-    config.loadFromObject(__config);
-    logger.use(config.log.dest);
-    logger.setLogDir(config.log.dir);
+    if (__config) {
+      // re-update if override
+      configUtils.loadFromObject(__config, config);
+    }
+    logger.use(config.logDest);
+    logger.setLogDir(config.logDir);
 
-    // make sure tmp dir exists
-    if (!fs.existsSync(config.tmp.dir)) {
-      fs.mkdirSync(config.tmp.dir);
+    if (!fs.existsSync(config.tmpDir)) {
+      fs.mkdirSync(config.tmpDir);
     }
 
-    // make sure tmp dir exists
-    if (!fs.existsSync(config.log.dir)) {
-      fs.mkdirSync(config.log.dir);
+    if (!fs.existsSync(config.logDir)) {
+      fs.mkdirSync(config.logDir);
+    }
+
+    if (!fs.existsSync(config.jobDir)) {
+      fs.mkdirSync(config.jobDir);
     }
 
     logger.info(config);
 
-    await puppeteerManager.launch(config.puppeteer.launchOption);
+    await puppeteerManager.launch(config.puppeteerLaunchOption, () => {
+      logger.error(new errors.PuppeteerDisconnected());
+      setTimeout(() => process.exit(0), 1000);
+    });
 
-    if (config.job.info.url) {
-      try {
-        await jobTemplateDb.downloadFromInfo(
-          config.job.info.url,
-          config.job.dir,
+    try {
+      const _axios = axios.default.create();
+
+      const response = await _axios
+        .post(
+          config.controlPlaneUrl,
+          { cmd: "get-job-info" },
           {
             headers: {
-              Authorization: `Bearer ${config.job.accessToken}`,
+              Authorization: `Bearer ${config.accessToken}`,
+            },
+          },
+        )
+        .then((res) => res.data);
+      const infos = response.data;
+
+      for (const info of infos) {
+        const { key, downloadUrl, fileName } = info;
+        logger.info(`job "${key}" downloading`);
+
+        await downloadUtils.downloadFile(
+          downloadUrl,
+          path.join(config.jobDir, fileName),
+          {
+            headers: {
+              Authorization: `Bearer ${config.accessToken}`,
             },
           },
         );
-      } catch (err) {
-        logger.error(err, "jobTemplateDb.downloadFromInfo");
+
+        logger.info(`job "${key}" downloaded`);
       }
+    } catch (err) {
+      logger.error(err, "index.js > download info");
     }
 
-    jobTemplateDb.loadFromDir(config.job.dir, config.job.import.prefix);
+    jobTemplateDb.loadFromDir(config.jobDir, config.jobImportPrefix);
 
     jobService.start(async (body) => {
       try {
@@ -153,6 +186,13 @@ class PuppeteerWorker {
         return { success: false, err: err.message };
       }
     });
+  }
+
+  async stop() {
+    const puppeteerManager = this.getPuppeteerManager();
+    const browser = puppeteerManager.getBrowser();
+    await browser.close();
+    setTimeout(() => process.exit(0), 1000);
   }
 }
 
