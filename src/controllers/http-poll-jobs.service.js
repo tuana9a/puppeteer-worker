@@ -1,6 +1,6 @@
-const axios = require("axios");
+const _axios = require("axios");
 
-const _axios = axios.default.create();
+const axios = _axios.default.create();
 
 class HttpPollJobsService {
   config;
@@ -9,26 +9,14 @@ class HttpPollJobsService {
 
   logger;
 
-  getConfig() {
-    return this.config;
-  }
-
-  getLoop() {
-    return this.loop;
-  }
-
-  getLogger() {
-    return this.logger;
-  }
-
   async start(handler) {
     const config = this.getConfig();
     const loop = this.getLoop();
     const logger = this.getLogger();
 
     loop.infinity(async () => {
-      const baseErrAt = "httpPollJobService.start > loop.infinity";
-      const response = await _axios
+      const baseErrAt = `${HttpPollJobsService.name}.${this.start.name} > loop.${loop.infinity.name}`;
+      const response = await axios
         .post(
           config.controlPlaneUrl,
           {
@@ -42,7 +30,7 @@ class HttpPollJobsService {
         )
         .then((res) => res.data)
         .catch((err) => {
-          logger.error(err, `${baseErrAt} > get jobs`);
+          logger.error(err, `${baseErrAt} > poll-jobs`);
           return { data: [] };
         });
 
@@ -59,10 +47,13 @@ class HttpPollJobsService {
             success: false,
             err: { message: err.message, stack: err.stack },
           };
-          logger.error(err, `${baseErrAt} > for : jobs > handler(job)`);
+          logger.error(
+            err,
+            `${baseErrAt} > for const job of jobs > handler(job)`,
+          );
         }
 
-        _axios
+        axios
           .post(
             config.controlPlaneUrl,
             JSON.stringify({
@@ -76,7 +67,7 @@ class HttpPollJobsService {
               },
             },
           )
-          .catch((err) => logger.error(err, `${baseErrAt} > post result`));
+          .catch((err) => logger.error(err, `${baseErrAt} > submit-result`));
       }
     }, config.repeatPollJobsAfter);
   }

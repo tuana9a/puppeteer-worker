@@ -28,12 +28,12 @@ describe("test config", () => {
 
   test("should match updated value", () => {
     const config = new Config();
-    configUtils.loadFromObject({
+    configUtils.updateFromObject(config, {
       tmpDir: ".tmp/",
       secret: "iloveyou",
       maxTry: 11,
       puppeteerMode: "visible",
-    }, config);
+    });
     expect(config.toObj()).toEqual({
       tmpDir: ".tmp/",
       logDest: "cs",

@@ -2,6 +2,8 @@
 
 a simple [puppeteer](https://github.com/puppeteer/puppeteer) worker will poll jobs every seconds from server to run then submit result back
 
+for control-plane see [puppeteer-control-plane](https://github.com/tuana9a/puppeteer-control-plane)
+
 # Installing
 
 Using npm:
@@ -10,9 +12,9 @@ Using npm:
 npm install puppeteer-worker
 ```
 
-# Example
+# Basic Usage
 
-basic
+## with **puppeteer-worker<=2.0.0**
 
 ```js
 const { PuppeteerWorker } = require("puppeteer-worker");
@@ -30,6 +32,26 @@ new PuppeteerWorker({
   // repeatPollJobsAfter: 5000, // 5 seconds
   // puppeteerMode: "headless", // "default", "headless", "visible", "docker"
 }).start();
+```
+
+```js
+const { launch } = require("puppeteer-worker");
+
+const worker = launch({
+  // tmpDir: "./.tmp/", // tmp dir for storing things
+  // logDest: "cs", // log destinantion can be file or console: "fs", "cs"
+  // logDir: "./logs/", log directory
+  // secret: "tuana9a", // worker secret
+  // accessToken: "tuana9a", // control plane access token
+  // maxTry: 10,
+  // jobDir: "./.tmp/", // job dir default is equal to tmpDir
+  // jobImportPrefix: "../../", // relative path from job-template.db.js
+  // controlPlaneUrl: "http://localhost:8080/api/jobs",
+  // repeatPollJobsAfter: 5000, // 5 seconds
+  // puppeteerMode: "headless", // "default", "headless", "visible", "docker"
+});
+
+worker.start();
 ```
 
 start with bash

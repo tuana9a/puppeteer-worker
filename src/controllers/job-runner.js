@@ -10,14 +10,6 @@ class JobRunner {
 
   logger;
 
-  getJobValidation() {
-    return this.jobValidation;
-  }
-
-  getLogger() {
-    return this.logger;
-  }
-
   async run({ id, tasks, page, input, ctx: extraCtx }) {
     const jobValidation = this.getJobValidation();
     const logger = this.getLogger();
@@ -51,7 +43,10 @@ class JobRunner {
       try {
         output = await task.run(ctx);
       } catch (err) {
-        logger.error(err, "jobRunner.run > for (const task of tasks)");
+        logger.error(
+          err,
+          `${JobRunner.name}.${this.run.name} > for (const task of tasks)`,
+        );
         output.isServerError = true;
         output.messages.push({
           name: err.name,

@@ -1,6 +1,6 @@
 const puppeteer = require("puppeteer");
 
-class PuppeteerManager {
+class PuppeteerClient {
   /**
    * @param {puppeteerLaunchOptions} launchOption
    */
@@ -22,4 +22,4 @@ class PuppeteerManager {
   }
 }
 
-module.exports = PuppeteerManager;
+module.exports = PuppeteerClient;

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const yargs = require("yargs");
-const { PuppeteerWorker } = require("../src/index");
+const { launch } = require("../src/index");
 
 const cliParser = yargs
   .usage("Usage: puppeteer-worker")
@@ -33,6 +33,13 @@ const cliParser = yargs
     type: "string",
     description: "worker secret",
   })
+  .option("m", {
+    alias: "mode",
+    type: "string",
+    default: "default",
+    choices: ["default", "headless", "visible", "docker"],
+    describe: "The puppeteer mode",
+  })
   .option("log-dest", {
     type: "string",
     default: "cs",
@@ -53,17 +60,10 @@ const cliParser = yargs
   .option("max-try", {
     type: "number",
     default: 10,
-  })
-  .option("mode", {
-    type: "string",
-    default: "default",
-    choices: ["default", "headless", "visible", "docker"],
-    describe: "The puppeteer mode",
   });
-
 const options = cliParser.argv;
 
-new PuppeteerWorker({
+const puppeteerWorker = launch({
   tmpDir: options.tmpDir, // tmp dir for storing things like jobs files
   logDest: options.logDest, // "fs" or "cs"
   logDir: options.logDir,
@@ -74,5 +74,7 @@ new PuppeteerWorker({
   accessToken: options.accessToken,
   repeatPollJobsAfter: options.repeatAfter,
   maxTry: options.maxTry,
-  puppeteerMode: options.puppeteerMode, // "default", "headless", "visible", "docker"
-}).start();
+  puppeteerMode: options.mode, // "default", "headless", "visible", "docker"
+});
+
+puppeteerWorker.start();

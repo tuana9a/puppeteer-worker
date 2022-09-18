@@ -31,7 +31,10 @@ class Config {
 }
 
 export class PuppeteerWorker {
-  constructor(__config?: Config);
-  async start(__config?: Config): void;
+  constructor(_config?: Config);
+  async start(_config?: Config): void;
+  async stop(): void;
   getConfig(): Config;
 }
+
+export function launch(_config: Config): PuppeteerWorker;

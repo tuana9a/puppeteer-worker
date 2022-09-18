@@ -18,18 +18,22 @@ class JobTemplateDb {
     return this.db;
   }
 
-  getLogger() {
-    return this.logger;
-  }
-
   loadFromFile(modulePath, jobKey, importPrefix = "") {
     const db = this.getDb();
     const logger = this.getLogger();
-    const module = require(path.join(importPrefix, modulePath));
-    for (const subKey of Object.keys(module)) {
-      const jobId = `${jobKey}/${subKey}`;
-      db.set(jobId, module[subKey]);
-      logger.info(`Loaded job: "${jobId}"`);
+    try {
+      const module = require(path.join(importPrefix, modulePath));
+      for (const subKey of Object.keys(module)) {
+        const jobId = `${jobKey}/${subKey}`;
+        db.set(jobId, module[subKey]);
+        logger.info(`Loaded job: "${jobId}"`);
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.log(
+        "if you has trouble in importing module see https://github.com/tuana9a/puppeteer-worker/blob/main/TROUBLESHOOTING.md#configjobimportprefix-explaination\n",
+      );
+      logger.error(err, `${JobTemplateDb.name}.${this.loadFromFile.name}`);
     }
   }
 

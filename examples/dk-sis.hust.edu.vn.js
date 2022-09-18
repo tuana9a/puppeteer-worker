@@ -3,7 +3,7 @@ const LOGOUT_URL = "http://dk-sis.hust.edu.vn/Users/Logout.aspx";
 const SAVE_CAPTCHA_SCREENSHOT_TO = "./.tmp/temp.png";
 const MAX_TRY_CAPTCHA_COUNT = 10;
 
-class HustActionOutput {
+class Output {
   constructor() {
     this.isServerError = false;
     this.isCaptchaError = false;
@@ -51,7 +51,7 @@ async function gotoLoginPage(ctx) {
   await page.bringToFront();
   await page.goto(LOGIN_URL);
   await page.waitForTimeout(1000);
-  return new HustActionOutput();
+  return new Output();
 }
 
 async function loginOnce(ctx) {
@@ -76,7 +76,7 @@ async function loginOnce(ctx) {
     page.waitForTimeout(3000),
   ]);
   // EXPLAIN: check login success
-  const output = new HustActionOutput();
+  const output = new Output();
   if (page.url() === LOGIN_URL) {
     // EXPLAIN: nếu vẫn ở màn hình đăng nhập có thể có lỗi
     // check captcha error
@@ -100,7 +100,7 @@ async function loginOnce(ctx) {
 async function loginUntilSuccess(ctx) {
   // bắt đầu thực thi vòng lặp
   let tryCaptchaCount = 0;
-  let output = new HustActionOutput();
+  let output = new Output();
   while (tryCaptchaCount < MAX_TRY_CAPTCHA_COUNT) {
     tryCaptchaCount += 1;
     output = await loginOnce(ctx);
@@ -122,7 +122,7 @@ async function loginUntilSuccess(ctx) {
 async function autoRegisterClasses(ctx) {
   const { input: entry, page } = ctx;
   const { classIds } = entry;
-  const output = new HustActionOutput();
+  const output = new Output();
   const responseMessages = [];
   // EXPLAIN: main function
   const $inputClassId =
@@ -161,7 +161,7 @@ async function autoRegisterClasses(ctx) {
 async function crawlRegisterResult(ctx) {
   const { page } = ctx;
   // EXPLAIN: check result after submit
-  const output = new HustActionOutput();
+  const output = new Output();
   const statusOfClasses = await page.evaluate(() => {
     // note: browser scope not nodejs scope
     const classes = [];

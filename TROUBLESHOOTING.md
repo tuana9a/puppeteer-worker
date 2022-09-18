@@ -35,7 +35,7 @@ There will be much more **"`../`"**
         | -- puppeteer-worker
                 | -- src/
                     | -- common/
-                    | -- db/
+                    | -- controllers/
                     |     | -- job-template.db.js
                     ...etc
 ```

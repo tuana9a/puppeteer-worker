@@ -3,8 +3,8 @@ const fs = require("fs");
 const Config = require("./config");
 const options = require("./puppeteer-launch-options");
 
-function loadFromObject(object, _config) {
-  const config = _config || new Config();
+function updateFromObject(source, object) {
+  const config = source || new Config();
 
   if (object) {
     for (const key of Object.keys(config)) {
@@ -20,13 +20,13 @@ function loadFromObject(object, _config) {
   return config;
 }
 
-function loadFromFile(filepath, _config) {
+function updateFromFile(source, filepath) {
   const data = fs.readFileSync(filepath, { flag: "r", encoding: "utf-8" });
   const object = JSON.parse(data);
-  return loadFromObject(object, _config);
+  return updateFromObject(source, object);
 }
 
 module.exports = {
-  loadFromObject,
-  loadFromFile,
+  updateFromObject: updateFromObject,
+  updateFromFile: updateFromFile,
 };

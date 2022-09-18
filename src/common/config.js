@@ -1,6 +1,8 @@
 const options = require("./puppeteer-launch-options");
 
 class Config {
+  static _ignoreDeps = ["__all"];
+
   constructor() {
     this.tmpDir = "./.tmp/";
 
