@@ -1,7 +1,7 @@
 const fs = require("fs");
 
-const Config = require("./config");
-const options = require("./puppeteer-launch-options");
+const Config = require("../common/config");
+const options = require("../common/puppeteer-launch-options");
 
 function updateFromObject(source, object) {
   const config = source || new Config();

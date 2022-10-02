@@ -5,33 +5,14 @@ const { launch } = require("../src/index");
 
 const cliParser = yargs
   .usage("Usage: puppeteer-worker")
-  .option("a", {
-    alias: "access-token",
-    describe: "Your access token to control-plane",
+  .option("rabbitmq", {
+    describe: "the rabbitmq connection string",
     type: "string",
   })
-  .option("c", {
-    alias: "control-plane-url",
-    describe: "The control-plane url",
-    type: "string",
-    default: "http://localhost:8080/api/jobs",
-  })
-  .option("p", {
-    alias: "import-prefix",
+  .option("import-prefix", {
     type: "string",
     description: "import prefix string from jobDir",
     default: "../../",
-  })
-  .option("r", {
-    alias: "repeat-after",
-    type: "number",
-    description: "repeat poll jobs after",
-    default: 5000,
-  })
-  .option("s", {
-    alias: "secret",
-    type: "string",
-    description: "worker secret",
   })
   .option("m", {
     alias: "mode",
@@ -51,11 +32,11 @@ const cliParser = yargs
   })
   .option("job-dir", {
     type: "string",
-    default: "./.tmp/",
+    default: "./jobs/",
   })
   .option("tmp-dir", {
     type: "string",
-    default: "./.tmp/",
+    default: "./tmp/",
   })
   .option("max-try", {
     type: "number",
@@ -63,18 +44,21 @@ const cliParser = yargs
   });
 const options = cliParser.argv;
 
-const puppeteerWorker = launch({
-  tmpDir: options.tmpDir, // tmp dir for storing things like jobs files
-  logDest: options.logDest, // "fs" or "cs"
-  logDir: options.logDir,
-  secret: options.secret,
-  jobDir: options.jobDir,
-  jobImportPrefix: options.importPrefix, // the relative path from job-template.db.js
-  controlPlaneUrl: options.controlPlaneUrl,
-  accessToken: options.accessToken,
-  repeatPollJobsAfter: options.repeatAfter,
-  maxTry: options.maxTry,
-  puppeteerMode: options.mode, // "default", "headless", "visible", "docker"
-});
+async function main() {
+  const puppeteerWorker = await launch({
+    tmpDir: options.tmpDir, // tmp dir currently not used yet
+    logDest: options.logDest, // "fs" or "cs"
+    logDir: options.logDir,
+    secret: options.secret,
+    jobDir: options.jobDir,
+    jobImportPrefix: options.importPrefix, // the relative path from job-template.db.js
+    rabbitmqConnectionString: options.rabbitmq,
+    maxTry: options.maxTry,
+    puppeteerMode: options.mode, // "default", "headless", "visible", "docker"
+  });
 
-puppeteerWorker.start();
+  // puppeteerWorker.http().start();
+  puppeteerWorker.amqp().start();
+}
+
+main();

@@ -1,10 +1,8 @@
 const options = require("./puppeteer-launch-options");
 
 class Config {
-  static _ignoreDeps = ["__all"];
-
   constructor() {
-    this.tmpDir = "./.tmp/";
+    this.tmpDir = "./tmp/";
 
     this.logDest = "cs";
     this.logDir = "./logs/";
@@ -13,11 +11,13 @@ class Config {
     this.accessToken = undefined;
     this.maxTry = 10;
 
-    this.jobDir = "./.tmp/";
+    this.jobDir = "./jobs/";
     this.jobImportPrefix = "";
 
     this.controlPlaneUrl = undefined;
     this.repeatPollJobsAfter = 5000;
+
+    this.rabbitmqConnectionString = undefined;
 
     this.puppeteerMode = "default";
     this.puppeteerLaunchOption = options.get(this.puppeteerMode);

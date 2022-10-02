@@ -2,7 +2,7 @@ const puppeteer = require("puppeteer");
 
 class PuppeteerClient {
   /**
-   * @param {puppeteerLaunchOptions} launchOption
+   * @param {puppeteer.LaunchOptions} launchOption
    */
   async launch(launchOption, onDisconnect = null) {
     this.browser = await puppeteer.launch(launchOption);
@@ -19,6 +19,10 @@ class PuppeteerClient {
   async getPageByIndex(index) {
     const tabs = await this.browser.pages();
     return tabs[index];
+  }
+
+  async getFirstPage() {
+    return this.getPageByIndex(0);
   }
 }
 

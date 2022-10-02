@@ -1,15 +1,15 @@
 const Config = require("../../src/common/config");
-const configUtils = require("../../src/common/config.utils");
+const configUtils = require("../../src/utils/config.utils");
 
 describe("test config", () => {
   test("should match default value", () => {
     const config = new Config();
     expect(config.toObj()).toEqual({
-      tmpDir: "./.tmp/",
+      tmpDir: "./tmp/",
       logDest: "cs",
       logDir: "./logs/",
       secret: undefined,
-      jobDir: "./.tmp/",
+      jobDir: "./tmp/",
       accessToken: undefined,
       controlPlaneUrl: undefined,
       jobImportPrefix: "",
@@ -29,17 +29,17 @@ describe("test config", () => {
   test("should match updated value", () => {
     const config = new Config();
     configUtils.updateFromObject(config, {
-      tmpDir: ".tmp/",
+      tmpDir: "tmp/",
       secret: "iloveyou",
       maxTry: 11,
       puppeteerMode: "visible",
     });
     expect(config.toObj()).toEqual({
-      tmpDir: ".tmp/",
+      tmpDir: "./tmp/",
       logDest: "cs",
       logDir: "./logs/",
       secret: "iloveyou",
-      jobDir: "./.tmp/",
+      jobDir: "./jobs/",
       accessToken: undefined,
       controlPlaneUrl: undefined,
       jobImportPrefix: "",

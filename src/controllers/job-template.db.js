@@ -4,8 +4,6 @@ const fs = require("fs");
 const path = require("path");
 
 class JobTemplateDb {
-  static _ignoreDeps = ["db"];
-
   db;
 
   logger;
@@ -18,6 +16,12 @@ class JobTemplateDb {
     return this.db;
   }
 
+  /**
+   * if you has trouble in importing module see https://github.com/tuana9a/puppeteer-worker/blob/main/TROUBLESHOOTING.md#configjobimportprefix-explaination
+   * @param {string} modulePath
+   * @param {string} jobKey
+   * @param {string} importPrefix
+   */
   loadFromFile(modulePath, jobKey, importPrefix = "") {
     const db = this.getDb();
     const logger = this.getLogger();
@@ -29,10 +33,6 @@ class JobTemplateDb {
         logger.info(`Loaded job: "${jobId}"`);
       }
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.log(
-        "if you has trouble in importing module see https://github.com/tuana9a/puppeteer-worker/blob/main/TROUBLESHOOTING.md#configjobimportprefix-explaination\n",
-      );
       logger.error(err, `${JobTemplateDb.name}.${this.loadFromFile.name}`);
     }
   }

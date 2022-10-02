@@ -1,8 +1,6 @@
 const fs = require("fs");
 
 class Logger {
-  static _ignoreDeps = ["logDir", "handler", "handlers"];
-
   datetimeUtils;
 
   logDir;

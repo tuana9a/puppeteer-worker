@@ -5,7 +5,7 @@ import {
 } from "puppeteer";
 
 class Config {
-  tmpDir: String = "./.tmp/";
+  tmpDir: String = "./tmp/";
 
   logDest: String = "cs";
   logDir: String = "./logs/";
@@ -15,7 +15,7 @@ class Config {
 
   maxTry: Number = 10;
 
-  jobDir: String = "./.tmp/";
+  jobDir: String = "./jobs/";
   jobImportPrefix: String = "";
 
   controlPlaneUrl: String = undefined;
@@ -32,9 +32,12 @@ class Config {
 
 export class PuppeteerWorker {
   constructor(_config?: Config);
-  async start(_config?: Config): void;
+  loadConfig(_config?: Config): void;
+  prepareWorkspace(): void;
+  async boot(): void;
+  async start(): void;
   async stop(): void;
   getConfig(): Config;
 }
 
-export function launch(_config: Config): PuppeteerWorker;
+export async function launch(_config: Config): Promise<PuppeteerWorker>;

@@ -14,37 +14,19 @@ npm install puppeteer-worker
 
 # Basic Usage
 
-## with **puppeteer-worker<=2.0.0**
-
-```js
-const { PuppeteerWorker } = require("puppeteer-worker");
-
-new PuppeteerWorker({
-  // tmpDir: "./.tmp/", // tmp dir for storing things
-  // logDest: "cs", // log destinantion can be file or console: "fs", "cs"
-  // logDir: "./logs/", log directory
-  // secret: "tuana9a", // worker secret
-  // accessToken: "tuana9a", // control plane access token
-  // maxTry: 10,
-  // jobDir: "./.tmp/", // job dir default is equal to tmpDir
-  // jobImportPrefix: "../../", // relative path from job-template.db.js
-  // controlPlaneUrl: "http://localhost:8080/api/jobs",
-  // repeatPollJobsAfter: 5000, // 5 seconds
-  // puppeteerMode: "headless", // "default", "headless", "visible", "docker"
-}).start();
-```
+## with **puppeteer-worker>=2.0.0**
 
 ```js
 const { launch } = require("puppeteer-worker");
 
 const worker = launch({
-  // tmpDir: "./.tmp/", // tmp dir for storing things
+  // tmpDir: "./tmp/", // tmp dir for storing things
   // logDest: "cs", // log destinantion can be file or console: "fs", "cs"
   // logDir: "./logs/", log directory
   // secret: "tuana9a", // worker secret
   // accessToken: "tuana9a", // control plane access token
   // maxTry: 10,
-  // jobDir: "./.tmp/", // job dir default is equal to tmpDir
+  // jobDir: "./jobs/", // job dir default is equal to tmpDir
   // jobImportPrefix: "../../", // relative path from job-template.db.js
   // controlPlaneUrl: "http://localhost:8080/api/jobs",
   // repeatPollJobsAfter: 5000, // 5 seconds

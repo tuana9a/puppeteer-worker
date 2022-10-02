@@ -3,7 +3,7 @@
 The project structure look like
 
 ```
-| -- .tmp/
+| -- jobs/
 |      | -- job1.js
 |      | -- job2.js
 | -- src/
@@ -17,10 +17,10 @@ so if `job-template.db.js` needs to **import** or **require(modulepath)** it nee
 
 ```js
 // job-template.db.js
-const job1 = require("./.tmp/job1"); // not work
+const job1 = require("./jobs/job1"); // not work
 
 // adding "../../"
-const job1 = require("../../" + ".tmp/job1"); // work
+const job1 = require("../../jobs/job1"); // work
 ```
 
 if you install `puppeteer-worker` then propably in will be in your `node_modules` folder, then the prefix must be different.
@@ -28,7 +28,7 @@ if you install `puppeteer-worker` then propably in will be in your `node_modules
 There will be much more **"`../`"**
 
 ```
-| -- .tmp/
+| -- jobs/
 |      | -- job1.js
 |      | -- job2.js
 | -- node_modules/
@@ -41,10 +41,10 @@ There will be much more **"`../`"**
 ```
 
 ```js
-const job1 = require("../../" + ".tmp/job1"); // not work anymore
+const job1 = require("../../jobs/job1"); // not work anymore
 
 // adding more "../../"
-const job1 = require("../../../../" + ".tmp/job1"); // work
+const job1 = require("../../../../jobs/job1"); // work
 ```
 
 I suggest using absolute path like `~/Projects/puppeteer-worker` or `/home/tuana9a/Projects/puppeteer-worker` for simplicity
