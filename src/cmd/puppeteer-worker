@@ -1,21 +1,25 @@
 #!/usr/bin/env node
 
 const yargs = require("yargs");
-const { launch } = require("../src/index");
+const { launch } = require("../index");
 
 const cliParser = yargs
   .usage("Usage: puppeteer-worker")
+  .option("worker-type", {
+    type: "string",
+    default: "http",
+  })
   .option("rabbitmq", {
     describe: "the rabbitmq connection string",
     type: "string",
+    requiresArg: false,
   })
   .option("import-prefix", {
     type: "string",
     description: "import prefix string from jobDir",
     default: "../../",
   })
-  .option("m", {
-    alias: "mode",
+  .option("mode", {
     type: "string",
     default: "default",
     choices: ["default", "headless", "visible", "docker"],
@@ -41,6 +45,14 @@ const cliParser = yargs
   .option("max-try", {
     type: "number",
     default: 10,
+  })
+  .option("access-token", {
+    type: "string",
+    requiresArg: false,
+  })
+  .option("http-worker-pull-config-url", {
+    type: "string",
+    requiresArg: false,
   });
 const options = cliParser.argv;
 
@@ -51,14 +63,15 @@ async function main() {
     logDir: options.logDir,
     secret: options.secret,
     jobDir: options.jobDir,
+    httpWorkerPullConfigUrl: options.httpWorkerPullConfigUrl,
+    accessToken: options.accessToken,
     jobImportPrefix: options.importPrefix, // the relative path from job-template.db.js
     rabbitmqConnectionString: options.rabbitmq,
     maxTry: options.maxTry,
     puppeteerMode: options.mode, // "default", "headless", "visible", "docker"
   });
 
-  // puppeteerWorker.http().start();
-  puppeteerWorker.amqp().start();
+  puppeteerWorker[options.workerType]().start();
 }
 
 main();

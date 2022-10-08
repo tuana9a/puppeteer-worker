@@ -12,7 +12,7 @@
   "types": "./src/index.d.ts",
   "exports": "./src/index.js",
   "bin": {
-    "puppeteer-worker": "./cmd/puppeteer-worker"
+    "puppeteer-worker": "./src/cmd/puppeteer-worker"
   },
   "repository": {
     "type": "git",
@@ -30,6 +30,7 @@
     "axios": "0.25.0",
     "form-data": "4.0.0",
     "puppeteer": "13.5.1",
+    "puppeteer-worker-job-builder": "^1.0.0",
     "yargs": "17.5.1"
   },
   "devDependencies": {

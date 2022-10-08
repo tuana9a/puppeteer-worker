@@ -2,6 +2,7 @@
 /* eslint-disable import/no-dynamic-require */
 const fs = require("fs");
 const path = require("path");
+const { Job } = require("puppeteer-worker-job-builder/v1");
 
 class JobTemplateDb {
   db;
@@ -26,14 +27,15 @@ class JobTemplateDb {
     const db = this.getDb();
     const logger = this.getLogger();
     try {
-      const module = require(path.join(importPrefix, modulePath));
-      for (const subKey of Object.keys(module)) {
-        const jobId = `${jobKey}/${subKey}`;
-        db.set(jobId, module[subKey]);
-        logger.info(`Loaded job: "${jobId}"`);
+      const job = require(path.join(importPrefix, modulePath));
+      if (Job.isValidJob(job)) {
+        db.set(jobKey, job);
+        logger.info(`Loaded Job: ${jobKey}`);
+      } else {
+        logger.warn(`Invalid Job: ${jobKey}`);
       }
     } catch (err) {
-      logger.error(err, `${JobTemplateDb.name}.${this.loadFromFile.name}`);
+      logger.error(err);
     }
   }
 
@@ -42,13 +44,10 @@ class JobTemplateDb {
       .readdirSync(rootPath)
       .filter((x) => x.endsWith(".js"));
     for (const childPath of childPaths) {
-      const fullChildPath = path.join(rootPath, childPath);
+      const _childPath = path.join(rootPath, childPath);
       const lengthOfJs = ".js".length;
-      this.loadFromFile(
-        fullChildPath,
-        childPath.slice(0, -lengthOfJs),
-        importPrefix,
-      );
+      const jobKey = childPath.slice(0, -lengthOfJs);
+      this.loadFromFile(_childPath, jobKey, importPrefix);
     }
   }
 

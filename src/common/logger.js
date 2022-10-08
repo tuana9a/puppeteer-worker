@@ -17,23 +17,21 @@ class Logger {
   }
 
   /**
-   * @param {LogObject} object
+   * @param {*} object
    */
   _cs(object) {
     const now = new Date();
     let { data } = object;
     if (typeof data === "object") {
-      data = JSON.stringify(data);
+      data = JSON.stringify(data, null, "  ");
     }
-    const record = `${this.datetimeUtils.getFull(now)} [${
-      object.type
-    }] ${data}\n`;
+    const record = `${this.datetimeUtils.getFull(now)} [${object.type}] ${data}\n`;
     // eslint-disable-next-line no-console
     console.log(record);
   }
 
   /**
-   * @param {LogObject} object
+   * @param {*} object
    */
   _fs(object) {
     const now = new Date();
@@ -41,9 +39,7 @@ class Logger {
     if (typeof data === "object") {
       data = JSON.stringify(data);
     }
-    const record = `${this.datetimeUtils.getFull(now)} [${
-      object.type
-    }] ${data}\n`;
+    const record = `${this.datetimeUtils.getFull(now)} [${object.type}] ${data}\n`;
     const filepath = `${this.logDir + this.datetimeUtils.getDate(now)}.log`;
     fs.appendFileSync(filepath, record);
   }
@@ -70,13 +66,12 @@ class Logger {
   /**
    * @param {Error} err
    */
-  error(err, at = null) {
-    this.log({ type: "ERROR", data: `at ${at}` });
+  error(err) {
     this.log({ type: "ERROR", data: err.stack });
   }
 
   /**
-   * @param {LogObject} object
+   * @param {*} object
    */
   log(object) {
     if (this.handler) {

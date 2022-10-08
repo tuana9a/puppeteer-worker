@@ -1,48 +1,35 @@
 const _axios = require("axios");
 const path = require("path");
 
-const errors = require("../common/errors");
 const downloadUtils = require("../utils/download.utils");
 
 const axios = _axios.default.create();
 
 class HttpWorker {
-  constructor({
-    config,
-    loop,
-    logger,
-    puppeteerClient,
-    jobTemplateDb,
-    jobRunner,
-  }) {
-    this.config = config;
-    this.loop = loop;
-    this.logger = logger;
-    this.ppClient = puppeteerClient;
-    this.infos = [];
-    this.jobTemplateDb = jobTemplateDb;
-    this.jobRunner = jobRunner;
-  }
+  config;
 
-  /**
-   * { data: [jobs here...] }
-   * @param {string} url
-   * @param {*} headers
-   */
-  async downloadInfos(url, headers = {}) {
+  loop;
+
+  logger;
+
+  jobTemplateDb;
+
+  jobRunner;
+
+  async downloadJobs(url, jobDir, headers = {}) {
+    const logger = this.getLogger();
+
     const response = await axios
       .get(url, {
         headers: headers,
       })
       .then((res) => res.data);
-    this.infos = response.data;
-  }
 
-  async downloadJobsFromInfos(jobDir, headers = {}) {
-    const logger = this.getLogger();
-    for (const info of this.infos) {
+    const infos = response.data;
+
+    for (const info of infos) {
       const { key, downloadUrl, fileName } = info;
-      logger.info(`job "${key}" downloading`);
+      logger.info(`Downloading Job: ${key}`);
 
       await downloadUtils.downloadFile(
         downloadUrl,
@@ -51,101 +38,55 @@ class HttpWorker {
           headers: headers,
         },
       );
-
-      logger.info(`job "${key}" downloaded`);
     }
   }
 
   async start() {
-    const { config, loop, logger, jobTemplateDb, ppClient, jobRunner } = this;
+    const config = this.getConfig();
+    const loop = this.getLoop();
+    const logger = this.getLogger();
+    const jobTemplateDb = this.getJobTemplateDb();
+    const jobRunner = this.getJobRunner();
+
+    const httpWorkerConfig = await axios.get(config.httpWorkerPullConfigUrl, {
+      headers: {
+        Authorization: config.accessToken,
+      },
+    }).then((res) => res.data);
+
+    const { pollJobUrl, submitJobResultUrl } = httpWorkerConfig;
 
     loop.infinity(async () => {
-      const baseErrAt = `${HttpWorker.name}.${this.start.name} > loop.${loop.infinity.name}`;
-      const response = await axios
-        .post(
-          config.controlPlaneUrl,
-          {
-            cmd: "poll-job",
-          },
-          {
-            headers: {
-              Authorization: config.accessToken,
-            },
-          },
-        )
+      const job = await axios.get(pollJobUrl, { headers: { Authorization: config.accessToken } })
         .then((res) => res.data)
-        .catch((err) => {
-          logger.error(err, `${baseErrAt} > poll-jobs`);
-          return { data: [] };
-        });
+        .catch((err) => logger.error(err));
 
-      const jobInfos = response.data;
+      if (!job) {
+        return;
+      }
 
-      for (const jobInfo of jobInfos) {
-        let result = null;
-        try {
-          const jobId = jobInfo.id;
-          const jobInput = jobInfo.input;
-          const jobCtx = jobInfo.ctx;
-          const job = jobTemplateDb.get(jobId);
+      let logs = [];
+      try {
+        const params = job.input || job.params;
+        const mJob = jobTemplateDb.get(job.id);
 
-          logger.info(
-            `Doing job: id="${jobId}" input="${JSON.stringify(
-              jobInput,
-            )}" ctx="${JSON.stringify(jobCtx)}"`,
-          );
+        logger.info(`Doing Job: id: "${job.id}" params: "${JSON.stringify(params)}"`);
 
-          if (!job) {
-            const msg = `Job not found "${jobId}"`;
-            logger.warn(msg);
-            result = { success: false, msg: msg };
-          }
-
-          const page = await ppClient.getFirstPage();
-
-          if (!page) {
-            throw new errors.CanNotGetPage();
-          }
-
-          const jobTasks = job.tasks;
-          result = await jobRunner.run({
-            id: jobId,
-            tasks: jobTasks,
-            page,
-            input: jobInput,
-            ctx: jobCtx,
-          });
-
-          result = { success: true, result: result };
-        } catch (err) {
-          result = {
-            success: false,
-            err: { message: err.message, stack: err.stack },
-          };
-          logger.error(
-            err,
-            `${baseErrAt} > for const job of jobs > handler(job)`,
-          );
+        if (!mJob) {
+          logger.warn(`Job not found ${job.id}`);
         }
 
-        logger.info(result);
-
-        axios
-          .post(
-            config.controlPlaneUrl,
-            JSON.stringify({
-              cmd: "submit-result",
-              result: result,
-            }),
-            {
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: config.accessToken,
-              },
-            },
-          )
-          .catch((err) => logger.error(err, `${baseErrAt} > submit-result`));
+        logs = await jobRunner.run(mJob, params);
+      } catch (err) {
+        logger.error(err);
       }
+
+      axios.post(submitJobResultUrl, JSON.stringify({ data: logs }), {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: config.accessToken,
+        },
+      }).catch((err) => logger.error(err));
     }, config.repeatPollJobsAfter);
   }
 }

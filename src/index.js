@@ -4,11 +4,12 @@ const Loop = require("./common/loop");
 const JobRunner = require("./controllers/job-runner");
 const Logger = require("./common/logger");
 const DateTimeUtils = require("./utils/datetime.utils");
-const JobValidation = require("./common/job.validatation");
 const Config = require("./common/config");
 const PuppeteerClient = require("./controllers/puppeteer-client");
 const JobTemplateDb = require("./controllers/job-template.db");
 const PuppeteerWorker = require("./controllers/puppeteer-worker");
+const HttpWorker = require("./controllers/http-worker");
+const RabbitMQWorker = require("./controllers/rabbitmq-worker");
 
 async function launch(_config) {
   const ioc = new nanioc.IOCContainer({
@@ -20,7 +21,6 @@ async function launch(_config) {
     ignoreDeps: ["logDir", "handler", "handlers"],
   });
   ioc.addBean(DateTimeUtils, "datetimeUtils");
-  ioc.addBean(JobValidation, "jobValidation");
   ioc.addBean(Config, "config", { auto: true, ignoreDeps: ["__all"] });
   ioc.addBean(PuppeteerClient, "puppeteerClient");
   ioc.addBean(JobRunner, "jobRunner", { auto: true });
@@ -30,6 +30,8 @@ async function launch(_config) {
   });
   ioc.addBean(Loop, "loop");
   ioc.addBean(PuppeteerWorker, "puppeteerWorker", { auto: true });
+  ioc.addBean(HttpWorker, "httpWorker", { auto: true });
+  ioc.addBean(RabbitMQWorker, "rabbitWorker", { auto: true, ignoreDeps: "workerId" });
   ioc.di();
   const puppeteerWorker = ioc.getBean("puppeteerWorker").getInstance();
   puppeteerWorker.loadConfig(_config);
