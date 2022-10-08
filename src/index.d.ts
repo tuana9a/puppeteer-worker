@@ -18,7 +18,7 @@ class Config {
   jobDir: String = "./jobs/";
   jobImportPrefix: String = "";
 
-  controlPlaneUrl: String = undefined;
+  httpWorkerPullConfigUrl: String = undefined;
   repeatPollJobsAfter: Number = 5000;
 
   puppeteerMode: String = "default";

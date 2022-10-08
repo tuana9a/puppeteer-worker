@@ -1,67 +1,85 @@
 const amqp = require("amqplib/callback_api");
 
 class RabbitMQWorker {
-  constructor({ config, logger, puppeteerClient, jobTemplateDb, jobRunner }) {
-    this.config = config;
-    this.logger = logger;
-    this.jobTemplateDb = jobTemplateDb;
-    this.jobRunner = jobRunner;
-    this.puppeteerClient = puppeteerClient;
-    this.workerId = String(Math.random() * Date.now());
+  config;
+
+  logger;
+
+  jobTemplateDb;
+
+  jobRunner;
+
+  puppeteerClient;
+
+  constructor() {
+    this.workerId = `puppeteer_worker_${Date.now()}_${(Math.random() * 1000).toFixed(0)}`;
+  }
+
+  getWorkerId() {
+    return this.workerId;
   }
 
   start() {
-    const { config, workerId } = this;
-    const { rabbitmqConnectionString } = config;
+    const logger = this.getLogger();
+    const config = this.getConfig();
+    const workerId = this.getWorkerId();
+    const jobRunner = this.getJobRunner();
+    const jobTemplateDb = this.getJobTemplateDb();
     const newJobExchange = "new_job";
     const workerRegisterExchange = "puppeter_worker_register";
+    const submitJobResultExchange = "submit_job_result";
 
-    amqp.connect(rabbitmqConnectionString, (error0, connection) => {
+    amqp.connect(config.rabbitmqConnectionString, (error0, connection) => {
       if (error0) {
-        throw error0;
+        logger.error(error0);
+        return;
       }
       connection.createChannel((error1, channel) => {
         if (error1) {
-          throw error1;
+          logger.error(error1);
+          return;
         }
 
-        channel.assertExchange(newJobExchange, "direct", {
-          durable: false,
-        });
+        channel.prefetch(1);
+        channel.assertExchange(newJobExchange, "direct", { durable: false });
+        channel.assertExchange(workerRegisterExchange, "fanout", { durable: false });
+        channel.assertExchange(submitJobResultExchange, "fanout", { durable: false });
+        channel.assertQueue(workerId, { exclusive: true }, (error2, q) => {
+          if (error2) {
+            logger.error(error2);
+            return;
+          }
 
-        channel.assertExchange(workerRegisterExchange, "fanout", {
-          durable: false,
-        });
-
-        channel.assertQueue(
-          workerId,
-          {
-            exclusive: true,
-          },
-          (error2, q) => {
-            if (error2) {
-              throw error2;
-            }
-            console.log(" [*] Waiting for logs. To exit press CTRL+C");
-
-            channel.bindQueue(q.queue, newJobExchange, workerId);
-
-            channel.consume(
-              q.queue,
-              (msg) => {
-                console.log(
-                  " [x] %s: '%s'",
-                  msg.fields.routingKey,
-                  msg.content.toString(),
-                );
+          logger.info("Waiting for jobs. To exit press CTRL+C");
+          const routingKey = workerId;
+          channel.bindQueue(q.queue, newJobExchange, routingKey);
+          channel.consume(q.queue, async (msg) => {
+            logger.info(`Received RabbitMQ ${msg.fields.routingKey} ${msg.content.toString()}`);
+            try {
+              const job = JSON.parse(msg.content.toString());
+              if (!job) {
                 channel.ack(msg);
-              },
-              {
-                noAck: false,
-              },
-            );
-          },
-        );
+                return;
+              }
+
+              const params = job.input || job.params;
+              const mJob = jobTemplateDb.get(job.id);
+
+              logger.info(`Doing Job: id: "${job.id}" params: "${JSON.stringify(params)}"`);
+
+              if (!mJob) {
+                logger.warn(`Job not found ${job.id}`);
+              }
+
+              const logs = await jobRunner.run(mJob, params);
+
+              channel.publish(submitJobResultExchange, "", Buffer.from(JSON.stringify({ data: logs })));
+            } catch (err) {
+              logger.error(err);
+            }
+            channel.ack(msg);
+          }, { noAck: false });
+        });
       });
     });
   }

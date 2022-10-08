@@ -1,84 +1,104 @@
 const fs = require("fs");
-const axios = require("axios");
+const _axios = require("axios");
 const FormData = require("form-data");
-const errors = require("../common/errors");
+const { Job, ActionPayload, InvalidJobError } = require("puppeteer-worker-job-builder/v1");
 
-const _axios = axios.default.create();
+const axios = _axios.default.create();
 
 class JobRunner {
-  jobValidation;
-
   logger;
 
-  async run({ id, tasks, page, input, ctx: extraCtx }) {
-    const jobValidation = this.getJobValidation();
+  puppeteerClient;
+
+  /**
+   *
+   * @param {Job} job
+   * @param {*} params
+   * @returns
+   */
+  async run(job, params) {
+    if (!Job.isValidJob(job)) {
+      throw new InvalidJobError(job.name);
+    }
+
     const logger = this.getLogger();
-
-    // đảm bảo là có job, nếu không thì lỗi chưa check ở tiền xử lý
-    if (!jobValidation.isValidTasks(tasks)) {
-      throw new errors.InvalidTaskError(id);
-    }
-
-    // prepare opt
-    const ctx = {
-      ...extraCtx,
-      input,
-      page,
-      fs,
-      axios: _axios,
-      FormData,
+    const libs = {
+      fs: fs,
+      axios: axios,
+      FormData: FormData,
     };
+    const page = await this.getPuppeteerClient().getFirstPage();
+    const payload = ActionPayload.from({
+      currentIdx: 0,
+      libs: libs,
+      outputs: [],
+      page: page,
+      params: params,
+    });
+    const logs = [];
 
-    const result = {
-      name: id,
-      input: input,
-      logs: [],
-      isCompleted: true,
-      created: Date.now(),
-    };
-
-    for (const task of tasks) {
-      let output = { messages: [] };
-
+    for (const action of job.actions) {
       try {
-        output = await task.run(ctx);
-      } catch (err) {
-        logger.error(
-          err,
-          `${JobRunner.name}.${this.run.name} > for (const task of tasks)`,
-        );
-        output.isServerError = true;
-        output.messages.push({
-          name: err.name,
-          message: err.message,
-          stack: err.stack.split("\n"),
+        const output = await action.withPayload(payload).run();
+        payload.outputs[payload.currentIdx] = output;
+        logs.push({
+          action: action.name,
+          output: output,
+          at: Date.now(),
         });
-      }
-
-      const logRecord = {
-        task: task.run.name,
-        output,
-        at: Date.now(),
-      };
-
-      result.logs.push(logRecord);
-
-      // check xem có cần add lịch sử không
-      if (task.needToLog) {
-        logger.info(`output: ${JSON.stringify(logRecord, null, 2)}`);
-      }
-
-      // check xem có break không ?
-      if (task.breaker) {
-        if (task.breaker(output)) {
-          logRecord.breaker = { name: task.breaker.name, isBreak: true };
-          result.isCompleted = false;
-          break;
+        if (action.isBreakPoint()) {
+          if (output) {
+            const { doWhenBreak } = action;
+            if (doWhenBreak) {
+              if (doWhenBreak.__isMeAction) {
+                const nestedOutput = await doWhenBreak.withPayload(payload).run();
+                logs.push({
+                  action: action.name,
+                  at: Date.now(),
+                  output: nestedOutput,
+                });
+              } else if (Array.isArray(doWhenBreak)) {
+                for (const actionWhenBreak of doWhenBreak) {
+                  if (actionWhenBreak.__isMeAction) {
+                    const nestedOutput = await actionWhenBreak.withPayload(payload).run();
+                    logs.push({
+                      action: action.name,
+                      at: Date.now(),
+                      output: nestedOutput,
+                    });
+                  }
+                }
+              } else { // function
+                const nestedOutput = await doWhenBreak(payload);
+                logs.push({
+                  action: action.name,
+                  at: Date.now(),
+                  output: nestedOutput,
+                });
+              }
+            }
+            break;
+          }
         }
+      } catch (err) {
+        logs.push({
+          action: action.name,
+          at: Date.now(),
+          err: {
+            name: err.name,
+            message: err.message,
+            stack: err.stack.split("\n"),
+          },
+        });
+        break;
       }
+      payload.currentIdx += 1;
     }
 
-    return result;
+    logger.info(logs);
+    // logger.info(payload.outputs);
+
+    return logs;
   }
 }
 

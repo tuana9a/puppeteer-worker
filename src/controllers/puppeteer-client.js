@@ -17,8 +17,8 @@ class PuppeteerClient {
   }
 
   async getPageByIndex(index) {
-    const tabs = await this.browser.pages();
-    return tabs[index];
+    const pages = await this.browser.pages();
+    return pages[index];
   }
 
   async getFirstPage() {

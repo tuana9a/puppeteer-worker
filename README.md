@@ -28,7 +28,7 @@ const worker = launch({
   // maxTry: 10,
   // jobDir: "./jobs/", // job dir default is equal to tmpDir
   // jobImportPrefix: "../../", // relative path from job-template.db.js
-  // controlPlaneUrl: "http://localhost:8080/api/jobs",
+  // httpWorkerPullConfigUrl: "http://localhost:8080/api/jobs",
   // repeatPollJobsAfter: 5000, // 5 seconds
   // puppeteerMode: "headless", // "default", "headless", "visible", "docker"
 });

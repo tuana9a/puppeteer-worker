@@ -14,7 +14,7 @@ class Config {
     this.jobDir = "./jobs/";
     this.jobImportPrefix = "";
 
-    this.controlPlaneUrl = undefined;
+    this.httpWorkerPullConfigUrl = undefined;
     this.repeatPollJobsAfter = 5000;
 
     this.rabbitmqConnectionString = undefined;
