@@ -41,7 +41,7 @@ class PuppeteerWorker {
 
     logger.use(config.logDest);
     logger.setLogDir(config.logDir);
-    logger.info(config);
+    logger.info(config.toString());
 
     jobTemplateDb.loadFromDir(config.jobDir, config.jobImportPrefix);
 

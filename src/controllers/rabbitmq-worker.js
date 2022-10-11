@@ -12,7 +12,7 @@ class RabbitMQWorker {
   puppeteerClient;
 
   constructor() {
-    this.workerId = `puppeteer_worker_${Date.now()}_${(Math.random() * 1000).toFixed(0)}`;
+    this.workerId = `puppeteer_worker_${Date.now()}_${(Math.round(Math.random() * 1000))}`;
   }
 
   getWorkerId() {
@@ -25,7 +25,7 @@ class RabbitMQWorker {
     const workerId = this.getWorkerId();
     const jobRunner = this.getJobRunner();
     const jobTemplateDb = this.getJobTemplateDb();
-    const newJobExchange = "new_job";
+    const newJobQueue = "new_job";
     const workerRegisterExchange = "puppeter_worker_register";
     const submitJobResultExchange = "submit_job_result";
 
@@ -41,18 +41,15 @@ class RabbitMQWorker {
         }
 
         channel.prefetch(1);
-        channel.assertExchange(newJobExchange, "direct", { durable: false });
         channel.assertExchange(workerRegisterExchange, "fanout", { durable: false });
         channel.assertExchange(submitJobResultExchange, "fanout", { durable: false });
-        channel.assertQueue(workerId, { exclusive: true }, (error2, q) => {
+        channel.assertQueue(newJobQueue, null, (error2, q) => {
           if (error2) {
             logger.error(error2);
             return;
           }
 
           logger.info("Waiting for jobs. To exit press CTRL+C");
-          const routingKey = workerId;
-          channel.bindQueue(q.queue, newJobExchange, routingKey);
           channel.consume(q.queue, async (msg) => {
             logger.info(`Received RabbitMQ ${msg.fields.routingKey} ${msg.content.toString()}`);
             try {

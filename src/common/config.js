@@ -28,6 +28,15 @@ class Config {
       ...this,
     };
   }
+
+  toString() {
+    const output = ["Config: "];
+    for (const key of Object.keys(this)) {
+      const value = this[key];
+      output.push(`${key}=${value}`);
+    }
+    return output.join("\n");
+  }
 }
 
 module.exports = Config;

@@ -1,7 +1,7 @@
 const fs = require("fs");
 const _axios = require("axios");
 const FormData = require("form-data");
-const { Job, ActionPayload, InvalidJobError } = require("puppeteer-worker-job-builder/v1");
+const { Job, ActionPayload, InvalidJobError, ActionLog } = require("puppeteer-worker-job-builder/v1");
 
 const axios = _axios.default.create();
 
@@ -21,84 +21,48 @@ class JobRunner {
       throw new InvalidJobError(job.name);
     }
 
+    const { actions } = job;
     const logger = this.getLogger();
-    const libs = {
-      fs: fs,
-      axios: axios,
-      FormData: FormData,
-    };
     const page = await this.getPuppeteerClient().getFirstPage();
-    const payload = ActionPayload.from({
+    const payload = new ActionPayload({
       currentIdx: 0,
-      libs: libs,
-      outputs: [],
+      libs: {
+        fs: fs,
+        axios: axios,
+        FormData: FormData,
+      },
       page: page,
       params: params,
+      logs: [],
+      actions: actions,
+      stacks: Array.from(actions).reverse(),
     });
-    const logs = [];
 
-    for (const action of job.actions) {
+    let action = payload.stacks.pop();
+    while (!payload.isBreak() && Boolean(action)) {
       try {
-        const output = await action.withPayload(payload).run();
-        payload.outputs[payload.currentIdx] = output;
-        logs.push({
-          action: action.name,
-          output: output,
+        await action.withPayload(payload).run();
+        action = payload.stacks.pop();
+        payload.currentIdx += 1;
+      } catch (error) {
+        const err = {
+          name: error.name,
+          message: error.message,
+          stack: error.stack.split("\n"),
+        };
+        payload.logs.push(new ActionLog({
+          action: this.name,
           at: Date.now(),
-        });
-        if (action.isBreakPoint()) {
-          if (output) {
-            const { doWhenBreak } = action;
-            if (doWhenBreak) {
-              if (doWhenBreak.__isMeAction) {
-                const nestedOutput = await doWhenBreak.withPayload(payload).run();
-                logs.push({
-                  action: action.name,
-                  at: Date.now(),
-                  output: nestedOutput,
-                });
-              } else if (Array.isArray(doWhenBreak)) {
-                for (const actionWhenBreak of doWhenBreak) {
-                  if (actionWhenBreak.__isMeAction) {
-                    const nestedOutput = await actionWhenBreak.withPayload(payload).run();
-                    logs.push({
-                      action: action.name,
-                      at: Date.now(),
-                      output: nestedOutput,
-                    });
-                  }
-                }
-              } else { // function
-                const nestedOutput = await doWhenBreak(payload);
-                logs.push({
-                  action: action.name,
-                  at: Date.now(),
-                  output: nestedOutput,
-                });
-              }
-            }
-            break;
-          }
-        }
-      } catch (err) {
-        logs.push({
-          action: action.name,
-          at: Date.now(),
-          err: {
-            name: err.name,
-            message: err.message,
-            stack: err.stack.split("\n"),
-          },
-        });
+          err: err,
+        }));
+        payload.isBreak = () => true;
         break;
       }
-      payload.currentIdx += 1;
     }
 
-    logger.info(logs);
-    // logger.info(payload.outputs);
+    logger.info(payload.logs);
 
-    return logs;
+    return payload.logs;
   }
 }
 
