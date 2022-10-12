@@ -5,14 +5,12 @@ class RabbitMQWorker {
 
   logger;
 
-  jobTemplateDb;
-
   jobRunner;
 
   puppeteerClient;
 
   constructor() {
-    this.workerId = `puppeteer_worker_${Date.now()}_${(Math.round(Math.random() * 1000))}`;
+    this.workerId = `worker${Date.now()}}`;
   }
 
   getWorkerId() {
@@ -24,10 +22,9 @@ class RabbitMQWorker {
     const config = this.getConfig();
     const workerId = this.getWorkerId();
     const jobRunner = this.getJobRunner();
-    const jobTemplateDb = this.getJobTemplateDb();
-    const newJobQueue = "new_job";
-    const workerRegisterExchange = "puppeter_worker_register";
-    const submitJobResultExchange = "submit_job_result";
+    const newJobQueue = "newJob";
+    const workerStatusExchange = "workerStatus";
+    const newJobResultExchange = "newJobResult";
 
     amqp.connect(config.rabbitmqConnectionString, (error0, connection) => {
       if (error0) {
@@ -41,38 +38,29 @@ class RabbitMQWorker {
         }
 
         channel.prefetch(1);
-        channel.assertExchange(workerRegisterExchange, "fanout", { durable: false });
-        channel.assertExchange(submitJobResultExchange, "fanout", { durable: false });
+        channel.assertExchange(workerStatusExchange, "fanout", { durable: false });
+        channel.assertExchange(newJobResultExchange, "fanout", { durable: false });
         channel.assertQueue(newJobQueue, null, (error2, q) => {
           if (error2) {
             logger.error(error2);
             return;
           }
 
-          logger.info("Waiting for jobs. To exit press CTRL+C");
           channel.consume(q.queue, async (msg) => {
-            logger.info(`Received RabbitMQ ${msg.fields.routingKey} ${msg.content.toString()}`);
+            logger.info(`RabbitMQ: Received ${msg.fields.routingKey} ${msg.content.toString()}`);
             try {
               const job = JSON.parse(msg.content.toString());
-              if (!job) {
-                channel.ack(msg);
-                return;
-              }
-
-              const params = job.input || job.params;
-              const mJob = jobTemplateDb.get(job.id);
-
-              logger.info(`Doing Job: id: "${job.id}" params: "${JSON.stringify(params)}"`);
-
-              if (!mJob) {
-                logger.warn(`Job not found ${job.id}`);
-              }
-
-              const logs = await jobRunner.run(mJob, params);
-
-              channel.publish(submitJobResultExchange, "", Buffer.from(JSON.stringify({ data: logs })));
+              const logs = await jobRunner.run(job);
+              channel.publish(newJobResultExchange, "", Buffer.from(JSON.stringify({ data: logs })));
             } catch (err) {
               logger.error(err);
+              channel.publish(newJobResultExchange, "", Buffer.from(JSON.stringify({
+                err: {
+                  name: err.name,
+                  message: err.message,
+                  stack: err.stack.split("\n"),
+                },
+              })));
             }
             channel.ack(msg);
           }, { noAck: false });

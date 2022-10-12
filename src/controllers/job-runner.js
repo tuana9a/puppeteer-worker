@@ -3,6 +3,8 @@ const _axios = require("axios");
 const FormData = require("form-data");
 const { Job, ActionPayload, InvalidJobError, ActionLog } = require("puppeteer-worker-job-builder/v1");
 
+const { JobNotFoundError, InvalidJobRequest } = require("../common/errors");
+
 const axios = _axios.default.create();
 
 class JobRunner {
@@ -10,20 +12,32 @@ class JobRunner {
 
   puppeteerClient;
 
-  /**
-   *
-   * @param {Job} job
-   * @param {*} params
-   * @returns
-   */
-  async run(job, params) {
+  jobTemplateDb;
+
+  async run(jobRequest) {
+    if (!jobRequest) {
+      throw new InvalidJobRequest(jobRequest);
+    }
+
+    const logger = this.getLogger();
+    const puppeteerClient = this.getPuppeteerClient();
+    const jobTemplateDb = this.getJobTemplateDb();
+    const job = jobTemplateDb.get(jobRequest.id);
+
+    if (!job) {
+      throw new JobNotFoundError(jobRequest.id);
+    }
+
+    const params = jobRequest.input || jobRequest.params;
+
     if (!Job.isValidJob(job)) {
       throw new InvalidJobError(job.name);
     }
 
+    logger.info(`Doing Job: "${job.name}" params: "${JSON.stringify(params)}"`);
+
     const { actions } = job;
-    const logger = this.getLogger();
-    const page = await this.getPuppeteerClient().getFirstPage();
+    const page = await puppeteerClient.getFirstPage();
     const payload = new ActionPayload({
       currentIdx: 0,
       libs: {
@@ -45,15 +59,15 @@ class JobRunner {
         action = payload.stacks.pop();
         payload.currentIdx += 1;
       } catch (error) {
-        const err = {
-          name: error.name,
-          message: error.message,
-          stack: error.stack.split("\n"),
-        };
+        logger.error(error);
         payload.logs.push(new ActionLog({
-          action: this.name,
+          action: action.name,
           at: Date.now(),
-          err: err,
+          err: {
+            name: error.name,
+            message: error.message,
+            stack: error.stack.split("\n"),
+          },
         }));
         payload.isBreak = () => true;
         break;

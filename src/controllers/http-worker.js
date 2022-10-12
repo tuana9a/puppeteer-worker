@@ -12,8 +12,6 @@ class HttpWorker {
 
   logger;
 
-  jobTemplateDb;
-
   jobRunner;
 
   async downloadJobs(url, jobDir, headers = {}) {
@@ -45,7 +43,6 @@ class HttpWorker {
     const config = this.getConfig();
     const loop = this.getLoop();
     const logger = this.getLogger();
-    const jobTemplateDb = this.getJobTemplateDb();
     const jobRunner = this.getJobRunner();
 
     const httpWorkerConfig = await axios.get(config.httpWorkerPullConfigUrl, {
@@ -67,16 +64,7 @@ class HttpWorker {
 
       let logs = [];
       try {
-        const params = job.input || job.params;
-        const mJob = jobTemplateDb.get(job.id);
-
-        logger.info(`Doing Job: id: "${job.id}" params: "${JSON.stringify(params)}"`);
-
-        if (!mJob) {
-          logger.warn(`Job not found ${job.id}`);
-        }
-
-        logs = await jobRunner.run(mJob, params);
+        logs = await jobRunner.run(job);
       } catch (err) {
         logger.error(err);
       }

@@ -1,4 +1,4 @@
-const PuppeteerDisconnectedError = require("../errors/puppeteer-disconnected.error");
+const { PuppeteerDisconnectedError } = require("../common/errors");
 const configUtils = require("../utils/config.utils");
 const otherUtils = require("../utils/other.utils");
 
