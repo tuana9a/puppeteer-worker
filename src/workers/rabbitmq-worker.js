@@ -1,4 +1,12 @@
 const amqp = require("amqplib/callback_api");
+const { toErr } = require("../common/errors");
+const { toBuffer } = require("../common/payloads");
+
+const NEW_JOB_QUEUE = "jobs.new";
+const JOB_RESULT_QUEUE = "jobs.result";
+const WORKER_FEEDBACK_EXCHANGE = "worker.feedback";
+const DOING_ROUTING_KEY = "doing";
+const PING_ROUTING_KEY = "ping";
 
 class RabbitMQWorker {
   config;
@@ -22,9 +30,6 @@ class RabbitMQWorker {
     const config = this.getConfig();
     const workerId = this.getWorkerId();
     const jobRunner = this.getJobRunner();
-    const newJobQueue = "newJob";
-    const workerStatusExchange = "workerStatus";
-    const newJobResultExchange = "newJobResult";
 
     amqp.connect(config.rabbitmqConnectionString, (error0, connection) => {
       if (error0) {
@@ -36,35 +41,33 @@ class RabbitMQWorker {
           logger.error(error1);
           return;
         }
+        const doing = (data) => channel.publish(WORKER_FEEDBACK_EXCHANGE, DOING_ROUTING_KEY, toBuffer({ workerId: workerId, data: data }));
 
         channel.prefetch(1);
-        channel.assertExchange(workerStatusExchange, "fanout", { durable: false });
-        channel.assertExchange(newJobResultExchange, "fanout", { durable: false });
-        channel.assertQueue(newJobQueue, null, (error2, q) => {
+        channel.assertExchange(WORKER_FEEDBACK_EXCHANGE, "topic", { durable: false });
+        channel.assertQueue(JOB_RESULT_QUEUE);
+        channel.assertQueue(NEW_JOB_QUEUE, null, (error2, q) => {
           if (error2) {
             logger.error(error2);
             return;
           }
 
           channel.consume(q.queue, async (msg) => {
-            logger.info(`RabbitMQ: Received ${msg.fields.routingKey} ${msg.content.toString()}`);
+            logger.info(`Received: ${msg.fields.routingKey} ${msg.content.toString()}`);
             try {
               const job = JSON.parse(msg.content.toString());
-              const logs = await jobRunner.run(job);
-              channel.publish(newJobResultExchange, "", Buffer.from(JSON.stringify({ data: logs })));
+              const logs = await jobRunner.do(job, { doing: doing });
+              channel.sendToQueue(JOB_RESULT_QUEUE, toBuffer({ data: logs }));
             } catch (err) {
               logger.error(err);
-              channel.publish(newJobResultExchange, "", Buffer.from(JSON.stringify({
-                err: {
-                  name: err.name,
-                  message: err.message,
-                  stack: err.stack.split("\n"),
-                },
-              })));
+              channel.sendToQueue(JOB_RESULT_QUEUE, toBuffer({ err: toErr(err) }));
             }
             channel.ack(msg);
           }, { noAck: false });
         });
+        setInterval(() => {
+          channel.publish(WORKER_FEEDBACK_EXCHANGE, PING_ROUTING_KEY, toBuffer({ workerId: workerId }));
+        }, 3000);
       });
     });
   }

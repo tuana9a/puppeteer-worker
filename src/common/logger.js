@@ -1,4 +1,5 @@
 const fs = require("fs");
+const { toErr } = require("./errors");
 
 class Logger {
   datetimeUtils;
@@ -45,7 +46,7 @@ class Logger {
   }
 
   /**
-   * @param {String} handlerName
+   * @param {string} handlerName
    */
   use(handlerName) {
     this.handler = this.handlers.get(handlerName);
@@ -67,7 +68,7 @@ class Logger {
    * @param {Error} err
    */
   error(err) {
-    this.log({ type: "ERROR", data: err.stack });
+    this.log({ type: "ERROR", data: toErr(err) });
   }
 
   /**

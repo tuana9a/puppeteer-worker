@@ -2,7 +2,7 @@ const { PuppeteerDisconnectedError } = require("../common/errors");
 const configUtils = require("../utils/config.utils");
 const otherUtils = require("../utils/other.utils");
 
-class PuppeteerWorker {
+class WorkerController {
   logger;
 
   config;
@@ -10,10 +10,6 @@ class PuppeteerWorker {
   puppeteerClient;
 
   jobTemplateDb;
-
-  jobRunner;
-
-  loop;
 
   httpWorker;
 
@@ -66,4 +62,4 @@ class PuppeteerWorker {
   }
 }
 
-module.exports = PuppeteerWorker;
+module.exports = WorkerController;

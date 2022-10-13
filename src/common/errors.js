@@ -18,4 +18,16 @@ class InvalidJobRequest extends Error {
   }
 }
 
-module.exports = { PuppeteerDisconnectedError, JobNotFoundError, InvalidJobRequest };
+/**
+ *
+ * @param {Error} err
+ */
+function toErr(err) {
+  return {
+    name: err.name,
+    message: err.message,
+    stack: err.stack.split("\n"),
+  };
+}
+
+module.exports = { PuppeteerDisconnectedError, JobNotFoundError, InvalidJobRequest, toErr };

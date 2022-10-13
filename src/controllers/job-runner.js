@@ -3,7 +3,7 @@ const _axios = require("axios");
 const FormData = require("form-data");
 const { Job, ActionPayload, InvalidJobError, ActionLog } = require("puppeteer-worker-job-builder/v1");
 
-const { JobNotFoundError, InvalidJobRequest } = require("../common/errors");
+const { JobNotFoundError, InvalidJobRequest, toErr } = require("../common/errors");
 
 const axios = _axios.default.create();
 
@@ -14,7 +14,7 @@ class JobRunner {
 
   jobTemplateDb;
 
-  async run(jobRequest) {
+  async do(jobRequest, opts = { doing: false }) {
     if (!jobRequest) {
       throw new InvalidJobRequest(jobRequest);
     }
@@ -22,13 +22,13 @@ class JobRunner {
     const logger = this.getLogger();
     const puppeteerClient = this.getPuppeteerClient();
     const jobTemplateDb = this.getJobTemplateDb();
-    const job = jobTemplateDb.get(jobRequest.id);
+    const job = jobTemplateDb.get(jobRequest.name);
 
     if (!job) {
-      throw new JobNotFoundError(jobRequest.id);
+      throw new JobNotFoundError(jobRequest.name);
     }
 
-    const params = jobRequest.input || jobRequest.params;
+    const { params } = jobRequest;
 
     if (!Job.isValidJob(job)) {
       throw new InvalidJobError(job.name);
@@ -55,6 +55,9 @@ class JobRunner {
     let action = payload.stacks.pop();
     while (!payload.isBreak() && Boolean(action)) {
       try {
+        if (opts?.doing) {
+          opts.doing({ action: action.name, stacks: payload.stacks.map((x) => x.name) });
+        }
         await action.withPayload(payload).run();
         action = payload.stacks.pop();
         payload.currentIdx += 1;
@@ -63,18 +66,14 @@ class JobRunner {
         payload.logs.push(new ActionLog({
           action: action.name,
           at: Date.now(),
-          err: {
-            name: error.name,
-            message: error.message,
-            stack: error.stack.split("\n"),
-          },
+          err: toErr(error),
         }));
         payload.isBreak = () => true;
         break;
       }
     }
 
-    logger.info(payload.logs);
+    // console.log(payload.logs);
 
     return payload.logs;
   }

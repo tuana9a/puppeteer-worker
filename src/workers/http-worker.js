@@ -1,5 +1,6 @@
 const _axios = require("axios");
 const path = require("path");
+const { toErr } = require("../common/errors");
 
 const downloadUtils = require("../utils/download.utils");
 
@@ -58,23 +59,25 @@ class HttpWorker {
         .then((res) => res.data)
         .catch((err) => logger.error(err));
 
-      if (!job) {
-        return;
-      }
+      if (!job) return;
 
-      let logs = [];
       try {
-        logs = await jobRunner.run(job);
+        const logs = await jobRunner.do(job);
+        axios.post(submitJobResultUrl, JSON.stringify({ data: logs }), {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: config.accessToken,
+          },
+        }).catch((err) => logger.error(err));
       } catch (err) {
         logger.error(err);
+        axios.post(submitJobResultUrl, JSON.stringify({ err: toErr(err) }), {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: config.accessToken,
+          },
+        }).catch((err1) => logger.error(err1));
       }
-
-      axios.post(submitJobResultUrl, JSON.stringify({ data: logs }), {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: config.accessToken,
-        },
-      }).catch((err) => logger.error(err));
     }, config.repeatPollJobsAfter);
   }
 }

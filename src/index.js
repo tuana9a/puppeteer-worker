@@ -7,9 +7,9 @@ const DateTimeUtils = require("./utils/datetime.utils");
 const Config = require("./common/config");
 const PuppeteerClient = require("./controllers/puppeteer-client");
 const JobTemplateDb = require("./db/job-template.db");
-const PuppeteerWorker = require("./controllers/puppeteer-worker");
-const HttpWorker = require("./controllers/http-worker");
-const RabbitMQWorker = require("./controllers/rabbitmq-worker");
+const WorkerController = require("./controllers/worker.controller");
+const HttpWorker = require("./workers/http-worker");
+const RabbitMQWorker = require("./workers/rabbitmq-worker");
 
 async function launch(_config) {
   const ioc = new nanioc.IOCContainer({
@@ -29,16 +29,16 @@ async function launch(_config) {
     ignoreDeps: ["db"],
   });
   ioc.addBean(Loop, "loop");
-  ioc.addBean(PuppeteerWorker, "puppeteerWorker", { auto: true });
+  ioc.addBean(WorkerController, "workerController", { auto: true });
   ioc.addBean(HttpWorker, "httpWorker", { auto: true });
   ioc.addBean(RabbitMQWorker, "rabbitWorker", { auto: true, ignoreDeps: "workerId" });
   ioc.di();
-  const puppeteerWorker = ioc.getBean("puppeteerWorker").getInstance();
-  puppeteerWorker.loadConfig(_config);
-  puppeteerWorker.prepareWorkspace();
-  await puppeteerWorker.boot();
-  return puppeteerWorker;
+  const workerController = ioc.getBean("workerController").getInstance();
+  workerController.loadConfig(_config);
+  workerController.prepareWorkspace();
+  await workerController.boot();
+  return workerController;
 }
 
-module.exports.PuppeteerWorker = PuppeteerWorker;
+module.exports.WorkerController = WorkerController;
 module.exports.launch = launch;

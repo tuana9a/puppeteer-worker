@@ -1,8 +1,6 @@
 # puppeteer-worker
 
-a simple [puppeteer](https://github.com/puppeteer/puppeteer) worker will poll jobs every seconds from server to run then submit result back
-
-for control-plane see [puppeteer-control-plane](https://github.com/tuana9a/puppeteer-control-plane)
+a simple [puppeteer](https://github.com/puppeteer/puppeteer) worker run automation task on web
 
 # Installing
 
@@ -14,12 +12,10 @@ npm install puppeteer-worker
 
 # Basic Usage
 
-## with **puppeteer-worker>=2.0.0**
-
 ```js
 const { launch } = require("puppeteer-worker");
 
-const worker = launch({
+const workerController = launch({
   // tmpDir: "./tmp/", // tmp dir for storing things
   // logDest: "cs", // log destinantion can be file or console: "fs", "cs"
   // logDir: "./logs/", log directory
@@ -33,7 +29,7 @@ const worker = launch({
   // puppeteerMode: "headless", // "default", "headless", "visible", "docker"
 });
 
-worker.start();
+workerController.http().start();
 ```
 
 start with bash
@@ -48,6 +44,8 @@ see help for details
 ./node_modules/.bin/puppeteer-worker --help
 ```
 
-## **Note**
+# **Related**
 
-for config.jobImportPrefix see [troubleshooting](./troubleshooting.md#configjobimportprefix-explaination)
+For `config.jobImportPrefix` see [troubleshooting](./troubleshooting.md#configjobimportprefix-explaination)
+
+[puppeteer-worker-job-builder](https://github.com/tuana9a/puppeteer-worker-job-builder)
