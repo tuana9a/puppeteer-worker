@@ -5,25 +5,26 @@ import {
 } from "puppeteer";
 
 class Config {
-  tmpDir: string = "./tmp/";
+  workerType: string;
+  tmpDir: string;
 
-  logDest: string = "cs";
-  logDir: string = "./logs/";
+  logDest: string;
+  logDir: string;
 
-  secret: string = undefined;
-  accessToken: string = undefined;
+  secret: string;
+  accessToken: string;
 
-  maxTry: Number = 10;
+  maxTry: Number;
 
-  jobDir: string = "./jobs/";
-  jobImportPrefix: string = "";
+  jobDir: string;
+  jobImportPrefix: string;
 
-  httpWorkerPullConfigUrl: string = undefined;
-  repeatPollJobsAfter: Number = 5000;
+  httpWorkerPullConfigUrl: string;
+  repeatPollJobsAfter: Number;
 
   rabbitmqConnectionString: string;
 
-  puppeteerMode: string = "default";
+  puppeteerMode: string;
   puppeteerLaunchOption: LaunchOptions &
     BrowserLaunchArgumentOptions &
     BrowserConnectOptions & {
@@ -54,6 +55,7 @@ export class WorkerController {
   async stop(): void;
   rabbit(): RabbitMQWorker;
   http(): HttpWorker;
+  auto(): RabbitMQWorker | HttpWorker;
   getConfig(): Config;
 }
 

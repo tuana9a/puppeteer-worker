@@ -48,6 +48,10 @@ class WorkerController {
     await puppeteerClient.launch(config.puppeteerLaunchOption, onPuppeteerDisconnected);
   }
 
+  auto() {
+    return this[this.config.workerType]();
+  }
+
   rabbit() {
     return this.getRabbitWorker();
   }

@@ -1,7 +1,7 @@
 const fs = require("fs");
 const _axios = require("axios");
 const FormData = require("form-data");
-const { Job, ActionPayload, InvalidJobError, ActionLog } = require("puppeteer-worker-job-builder/v1");
+const { isValidJob, ActionPayload, InvalidJobError, ActionLog } = require("puppeteer-worker-job-builder/v1");
 
 const { JobNotFoundError, InvalidJobRequest, toErr } = require("../common/errors");
 
@@ -30,11 +30,9 @@ class JobRunner {
 
     const { params } = jobRequest;
 
-    if (!Job.isValidJob(job)) {
+    if (!isValidJob(job)) {
       throw new InvalidJobError(job.name);
     }
-
-    logger.info(`Doing Job: "${job.name}" params: "${JSON.stringify(params)}"`);
 
     const { actions } = job;
     const page = await puppeteerClient.getFirstPage();
@@ -55,9 +53,17 @@ class JobRunner {
     let action = payload.stacks.pop();
     while (!payload.isBreak() && Boolean(action)) {
       try {
-        if (opts?.doing) {
-          opts.doing({ action: action.name, stacks: payload.stacks.map((x) => x.name) });
-        }
+        const doing = {
+          id: jobRequest.id,
+          job: job.name,
+          action: action.name,
+          stacks: payload.stacks.map((x) => x.name),
+          at: Date.now(),
+        };
+
+        logger.info(`Doing: id: ${doing.id}\njob: ${doing.job} action: ${doing.action} at: ${doing.at}\nstacks: ${JSON.stringify(doing.stacks, null, 2)}`);
+        if (opts?.doing) opts.doing(doing);
+
         await action.withPayload(payload).run();
         action = payload.stacks.pop();
         payload.currentIdx += 1;
@@ -74,7 +80,6 @@ class JobRunner {
     }
 
     // console.log(payload.logs);
-
     return payload.logs;
   }
 }

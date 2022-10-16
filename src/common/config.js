@@ -2,6 +2,7 @@ const options = require("./puppeteer-launch-options");
 
 class Config {
   constructor() {
+    this.workerType = "http";
     this.tmpDir = "./tmp/";
 
     this.logDest = "cs";
@@ -33,7 +34,7 @@ class Config {
     const output = ["Config: "];
     for (const key of Object.keys(this)) {
       const value = this[key];
-      output.push(`${key}=${value}`);
+      output.push(`${key}=${JSON.stringify(value, null, 2)}`);
     }
     return output.join("\n");
   }

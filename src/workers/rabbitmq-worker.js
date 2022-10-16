@@ -18,7 +18,7 @@ class RabbitMQWorker {
   puppeteerClient;
 
   constructor() {
-    this.workerId = `worker${Date.now()}}`;
+    this.workerId = `worker${Date.now()}`;
   }
 
   getWorkerId() {
@@ -53,9 +53,9 @@ class RabbitMQWorker {
           }
 
           channel.consume(q.queue, async (msg) => {
-            logger.info(`Received: ${msg.fields.routingKey} ${msg.content.toString()}`);
             try {
               const job = JSON.parse(msg.content.toString());
+              logger.info(`Received: ${msg.fields.routingKey} ${JSON.stringify(job, null, 2)}`);
               const logs = await jobRunner.do(job, { doing: doing });
               channel.sendToQueue(JOB_RESULT_QUEUE, toBuffer({ data: logs }));
             } catch (err) {

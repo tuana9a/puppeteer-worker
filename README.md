@@ -1,6 +1,6 @@
 # puppeteer-worker
 
-a simple [puppeteer](https://github.com/puppeteer/puppeteer) worker run automation task on web
+a simple [puppeteer](https://github.com/puppeteer/puppeteer) worker that runs [job](https://github.com/tuana9a/puppeteer-worker-job-builder)
 
 # Installing
 
@@ -16,10 +16,10 @@ npm install puppeteer-worker
 const { launch } = require("puppeteer-worker");
 
 const workerController = launch({
+  // workerType: "http", // "http" or "rabbit"
   // tmpDir: "./tmp/", // tmp dir for storing things
   // logDest: "cs", // log destinantion can be file or console: "fs", "cs"
   // logDir: "./logs/", log directory
-  // secret: "tuana9a", // worker secret
   // accessToken: "tuana9a", // control plane access token
   // maxTry: 10,
   // jobDir: "./jobs/", // job dir default is equal to tmpDir
@@ -27,9 +27,14 @@ const workerController = launch({
   // httpWorkerPullConfigUrl: "http://localhost:8080/api/jobs",
   // repeatPollJobsAfter: 5000, // 5 seconds
   // puppeteerMode: "headless", // "default", "headless", "visible", "docker"
+  // rabbitmqConnectionString: "amqp://localhost:5672"
 });
 
 workerController.http().start();
+// or
+workerController.rabbit().start();
+// or auto base on config
+workerController.auto().start();
 ```
 
 start with bash
@@ -47,5 +52,3 @@ see help for details
 # **Related**
 
 For `config.jobImportPrefix` see [troubleshooting](./troubleshooting.md#configjobimportprefix-explaination)
-
-[puppeteer-worker-job-builder](https://github.com/tuana9a/puppeteer-worker-job-builder)

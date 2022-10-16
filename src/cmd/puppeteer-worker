@@ -7,7 +7,7 @@ const cliParser = yargs
   .usage("Usage: puppeteer-worker")
   .option("worker-type", {
     type: "string",
-    default: "http",
+    requiresArg: false,
   })
   .option("rabbitmq", {
     describe: "the rabbitmq connection string",
@@ -21,7 +21,7 @@ const cliParser = yargs
   })
   .option("mode", {
     type: "string",
-    default: "default",
+    requiresArg: false,
     choices: ["default", "headless", "visible", "docker"],
     describe: "The puppeteer mode",
   })
@@ -57,7 +57,8 @@ const cliParser = yargs
 const options = cliParser.argv;
 
 async function main() {
-  const puppeteerWorker = await launch({
+  const workerController = await launch({
+    workerType: options.workerType || process.env.WORKER_TYPE || "http",
     tmpDir: options.tmpDir, // tmp dir currently not used yet
     logDest: options.logDest, // "fs" or "cs"
     logDir: options.logDir,
@@ -66,12 +67,12 @@ async function main() {
     httpWorkerPullConfigUrl: options.httpWorkerPullConfigUrl,
     accessToken: options.accessToken,
     jobImportPrefix: options.importPrefix, // the relative path from job-template.db.js
-    rabbitmqConnectionString: options.rabbitmq,
+    rabbitmqConnectionString: options.rabbitmq || process.env.RABBITMQ_CONNECTION_STRING,
     maxTry: options.maxTry,
-    puppeteerMode: options.mode, // "default", "headless", "visible", "docker"
+    puppeteerMode: options.mode || process.env.PUPPETEER_MODE || "default", // "default", "headless", "visible", "docker"
   });
 
-  puppeteerWorker[options.workerType]().start();
+  workerController.auto().start();
 }
 
 main();
