@@ -58,6 +58,7 @@ const options = cliParser.argv;
 
 async function main() {
   const workerController = await launch({
+    workerId: options.workerId || process.env.WORKER_ID || `worker${Date.now()}`,
     workerType: options.workerType || process.env.WORKER_TYPE || "http",
     tmpDir: options.tmpDir, // tmp dir currently not used yet
     logDest: options.logDest, // "fs" or "cs"

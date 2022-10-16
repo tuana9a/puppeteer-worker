@@ -2,6 +2,7 @@ const options = require("./puppeteer-launch-options");
 
 class Config {
   constructor() {
+    this.workerId = undefined;
     this.workerType = "http";
     this.tmpDir = "./tmp/";
 

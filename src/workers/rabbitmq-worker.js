@@ -17,12 +17,8 @@ class RabbitMQWorker {
 
   puppeteerClient;
 
-  constructor() {
-    this.workerId = `worker${Date.now()}`;
-  }
-
   getWorkerId() {
-    return this.workerId;
+    return this.config.workerId;
   }
 
   start() {
