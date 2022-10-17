@@ -25,14 +25,6 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
 
 WORKDIR /app
 
-COPY package.json .
+RUN npm install puppeteer-worker@2.0.0-a.3 --only=production
 
-COPY package-lock.json .
-
-RUN npm install --only=production
-
-COPY src/ src/
-
-RUN npm install .
-
-CMD ["./node_modules/.bin/puppeteer-worker", ""]
+CMD ["./node_modules/.bin/puppeteer-worker", "--config-file", "/etc/puppeteer-worker/config.json", "--mode", "docker", "--import-prefix", "/app/"]

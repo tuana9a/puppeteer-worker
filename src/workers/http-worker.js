@@ -1,5 +1,6 @@
 const _axios = require("axios");
 const path = require("path");
+const { toErr } = require("../common/errors");
 
 const downloadUtils = require("../utils/download.utils");
 
@@ -11,8 +12,6 @@ class HttpWorker {
   loop;
 
   logger;
-
-  jobTemplateDb;
 
   jobRunner;
 
@@ -45,7 +44,6 @@ class HttpWorker {
     const config = this.getConfig();
     const loop = this.getLoop();
     const logger = this.getLogger();
-    const jobTemplateDb = this.getJobTemplateDb();
     const jobRunner = this.getJobRunner();
 
     const httpWorkerConfig = await axios.get(config.httpWorkerPullConfigUrl, {
@@ -61,32 +59,25 @@ class HttpWorker {
         .then((res) => res.data)
         .catch((err) => logger.error(err));
 
-      if (!job) {
-        return;
-      }
+      if (!job) return;
 
-      let logs = [];
       try {
-        const params = job.input || job.params;
-        const mJob = jobTemplateDb.get(job.id);
-
-        logger.info(`Doing Job: id: "${job.id}" params: "${JSON.stringify(params)}"`);
-
-        if (!mJob) {
-          logger.warn(`Job not found ${job.id}`);
-        }
-
-        logs = await jobRunner.run(mJob, params);
+        const logs = await jobRunner.do(job);
+        axios.post(submitJobResultUrl, JSON.stringify({ data: logs }), {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: config.accessToken,
+          },
+        }).catch((err) => logger.error(err));
       } catch (err) {
         logger.error(err);
+        axios.post(submitJobResultUrl, JSON.stringify({ err: toErr(err) }), {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: config.accessToken,
+          },
+        }).catch((err1) => logger.error(err1));
       }
-
-      axios.post(submitJobResultUrl, JSON.stringify({ data: logs }), {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: config.accessToken,
-        },
-      }).catch((err) => logger.error(err));
     }, config.repeatPollJobsAfter);
   }
 }

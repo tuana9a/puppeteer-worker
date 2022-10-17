@@ -7,7 +7,8 @@ const cliParser = yargs
   .usage("Usage: puppeteer-worker")
   .option("worker-type", {
     type: "string",
-    default: "http",
+    requiresArg: false,
+    choices: ["http", "rabbit"],
   })
   .option("rabbitmq", {
     describe: "the rabbitmq connection string",
@@ -17,34 +18,34 @@ const cliParser = yargs
   .option("import-prefix", {
     type: "string",
     description: "import prefix string from jobDir",
-    default: "../../",
+    requiresArg: false,
   })
   .option("mode", {
     type: "string",
-    default: "default",
+    requiresArg: false,
     choices: ["default", "headless", "visible", "docker"],
     describe: "The puppeteer mode",
   })
   .option("log-dest", {
     type: "string",
-    default: "cs",
+    requiresArg: false,
     choices: ["cs", "fs"],
   })
   .option("log-dir", {
     type: "string",
-    default: "./logs/",
+    requiresArg: false,
   })
   .option("job-dir", {
     type: "string",
-    default: "./jobs/",
+    requiresArg: false,
   })
   .option("tmp-dir", {
     type: "string",
-    default: "./tmp/",
+    requiresArg: false,
   })
   .option("max-try", {
     type: "number",
-    default: 10,
+    requiresArg: false,
   })
   .option("access-token", {
     type: "string",
@@ -53,11 +54,18 @@ const cliParser = yargs
   .option("http-worker-pull-config-url", {
     type: "string",
     requiresArg: false,
+  })
+  .option("config-file", {
+    type: "string",
+    requiresArg: false,
   });
 const options = cliParser.argv;
 
 async function main() {
-  const puppeteerWorker = await launch({
+  const workerController = await launch({
+    configFile: options.configFile,
+    workerId: options.workerId,
+    workerType: options.workerType,
     tmpDir: options.tmpDir, // tmp dir currently not used yet
     logDest: options.logDest, // "fs" or "cs"
     logDir: options.logDir,
@@ -71,7 +79,7 @@ async function main() {
     puppeteerMode: options.mode, // "default", "headless", "visible", "docker"
   });
 
-  puppeteerWorker[options.workerType]().start();
+  workerController.auto().start();
 }
 
 main();

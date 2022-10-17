@@ -1,8 +1,8 @@
-const PuppeteerDisconnectedError = require("../errors/puppeteer-disconnected.error");
+const { PuppeteerDisconnectedError } = require("../common/errors");
 const configUtils = require("../utils/config.utils");
-const otherUtils = require("../utils/other.utils");
+const { ensureDirExists } = require("../utils/other.utils");
 
-class PuppeteerWorker {
+class WorkerController {
   logger;
 
   config;
@@ -11,10 +11,6 @@ class PuppeteerWorker {
 
   jobTemplateDb;
 
-  jobRunner;
-
-  loop;
-
   httpWorker;
 
   rabbitWorker;
@@ -22,15 +18,19 @@ class PuppeteerWorker {
   loadConfig(_config) {
     if (_config) {
       const config = this.getConfig();
+      if (_config.configFile) {
+        configUtils.updateFromFile(config, _config.configFile);
+      }
       configUtils.updateFromObject(config, _config);
+      configUtils.setDefaultIfFalsy(config);
     }
   }
 
   prepareWorkspace() {
     const config = this.getConfig();
-    otherUtils.ensureDirExists(config.tmpDir);
-    otherUtils.ensureDirExists(config.logDir);
-    otherUtils.ensureDirExists(config.jobDir);
+    ensureDirExists(config.tmpDir);
+    ensureDirExists(config.logDir);
+    ensureDirExists(config.jobDir);
   }
 
   async boot() {
@@ -41,7 +41,7 @@ class PuppeteerWorker {
 
     logger.use(config.logDest);
     logger.setLogDir(config.logDir);
-    logger.info(config);
+    logger.info(config.toString());
 
     jobTemplateDb.loadFromDir(config.jobDir, config.jobImportPrefix);
 
@@ -50,6 +50,10 @@ class PuppeteerWorker {
       setTimeout(() => process.exit(0), 100);
     };
     await puppeteerClient.launch(config.puppeteerLaunchOption, onPuppeteerDisconnected);
+  }
+
+  auto() {
+    return this[this.config.workerType]();
   }
 
   rabbit() {
@@ -66,4 +70,4 @@ class PuppeteerWorker {
   }
 }
 
-module.exports = PuppeteerWorker;
+module.exports = WorkerController;

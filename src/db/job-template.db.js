@@ -2,7 +2,7 @@
 /* eslint-disable import/no-dynamic-require */
 const fs = require("fs");
 const path = require("path");
-const { Job } = require("puppeteer-worker-job-builder/v1");
+const { Job, isValidJob } = require("puppeteer-worker-job-builder/v1");
 
 class JobTemplateDb {
   db;
@@ -28,11 +28,11 @@ class JobTemplateDb {
     const logger = this.getLogger();
     try {
       const job = require(path.join(importPrefix, modulePath));
-      if (Job.isValidJob(job)) {
+      if (isValidJob(job)) {
         db.set(jobKey, job);
-        logger.info(`Loaded Job: ${jobKey}`);
+        logger.info(`Job: Loaded: ${jobKey}`);
       } else {
-        logger.warn(`Invalid Job: ${jobKey}`);
+        logger.warn(`Job: Invalid: ${jobKey}`);
       }
     } catch (err) {
       logger.error(err);

@@ -5,23 +5,26 @@ import {
 } from "puppeteer";
 
 class Config {
-  tmpDir: String = "./tmp/";
+  workerType: string;
+  tmpDir: string;
 
-  logDest: String = "cs";
-  logDir: String = "./logs/";
+  logDest: string;
+  logDir: string;
 
-  secret: String = undefined;
-  accessToken: String = undefined;
+  secret: string;
+  accessToken: string;
 
-  maxTry: Number = 10;
+  maxTry: Number;
 
-  jobDir: String = "./jobs/";
-  jobImportPrefix: String = "";
+  jobDir: string;
+  jobImportPrefix: string;
 
-  httpWorkerPullConfigUrl: String = undefined;
-  repeatPollJobsAfter: Number = 5000;
+  httpWorkerPullConfigUrl: string;
+  repeatPollJobsAfter: Number;
 
-  puppeteerMode: String = "default";
+  rabbitmqConnectionString: string;
+
+  puppeteerMode: string;
   puppeteerLaunchOption: LaunchOptions &
     BrowserLaunchArgumentOptions &
     BrowserConnectOptions & {
@@ -30,14 +33,30 @@ class Config {
     };
 }
 
-export class PuppeteerWorker {
+class RabbitMQWorker {
+  constructor();
+
+  getWorkerId(): string;
+
+  start(): void;
+}
+
+class HttpWorker {
+  async downloadJob(url: string, jobDir: string, headers?: any): void;
+  async start(): void;
+}
+
+export class WorkerController {
   constructor(_config?: Config);
   loadConfig(_config?: Config): void;
   prepareWorkspace(): void;
   async boot(): void;
   async start(): void;
   async stop(): void;
+  rabbit(): RabbitMQWorker;
+  http(): HttpWorker;
+  auto(): RabbitMQWorker | HttpWorker;
   getConfig(): Config;
 }
 
-export async function launch(_config: Config): Promise<PuppeteerWorker>;
+export async function launch(_config: Config): Promise<WorkerController>;

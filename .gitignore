@@ -104,6 +104,6 @@ dist
 .tern-port
 
 # @tuana9a
-jobs/
-tmp/
-.vscode/
+/jobs/
+/tmp/
+/config.json

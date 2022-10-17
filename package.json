@@ -1,7 +1,7 @@
 {
   "name": "puppeteer-worker",
-  "version": "2.0.0-a.2",
-  "description": "Simple puppeteer worker that pull jobs to run",
+  "version": "2.0.0-a.3",
+  "description": "Simple puppeteer-worker run job",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
@@ -30,7 +30,7 @@
     "axios": "0.25.0",
     "form-data": "4.0.0",
     "puppeteer": "13.5.1",
-    "puppeteer-worker-job-builder": "^1.0.0",
+    "puppeteer-worker-job-builder": "^1.2.0-a.4",
     "yargs": "17.5.1"
   },
   "devDependencies": {
