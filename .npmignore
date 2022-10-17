@@ -1,0 +1,9 @@
+.vscode/
+jobs/
+logs/
+test/
+tmp/
+.env
+Dockerfile
+nodemon.json
+config.json

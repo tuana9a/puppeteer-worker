@@ -2,27 +2,29 @@ const options = require("./puppeteer-launch-options");
 
 class Config {
   constructor() {
-    this.workerId = undefined;
-    this.workerType = "http";
-    this.tmpDir = "./tmp/";
+    this.configFile = undefined;
 
-    this.logDest = "cs";
-    this.logDir = "./logs/";
+    this.workerId = undefined;
+    this.workerType = undefined;
+    this.tmpDir = undefined;
+
+    this.logDest = undefined;
+    this.logDir = undefined;
 
     this.secret = undefined;
     this.accessToken = undefined;
-    this.maxTry = 10;
+    this.maxTry = undefined;
 
-    this.jobDir = "./jobs/";
-    this.jobImportPrefix = "";
+    this.jobDir = undefined;
+    this.jobImportPrefix = undefined;
 
     this.httpWorkerPullConfigUrl = undefined;
-    this.repeatPollJobsAfter = 5000;
+    this.repeatPollJobsAfter = undefined;
 
     this.rabbitmqConnectionString = undefined;
 
-    this.puppeteerMode = "default";
-    this.puppeteerLaunchOption = options.get(this.puppeteerMode);
+    this.puppeteerMode = undefined;
+    this.puppeteerLaunchOption = undefined;
   }
 
   toObj() {
