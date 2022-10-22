@@ -4,8 +4,8 @@
   "description": "Simple puppeteer-worker run job",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "nodemon src/index.js",
+    "start": "src/cmd/puppeteer-worker --config-file config.json",
+    "dev": "nodemon src/cmd/puppeteer-worker --config-file config.json",
     "test:unit": "jest test/unit",
     "test:ci": "jest test/ci"
   },
@@ -25,12 +25,12 @@
   },
   "homepage": "https://github.com/tuana9a/puppeteer-worker#readme",
   "dependencies": {
-    "@tuana9a/nanioc": "0.3.2-a.2",
+    "@tuana9a/nanioc": "^0.3.3",
     "amqplib": "^0.10.3",
     "axios": "0.25.0",
     "form-data": "4.0.0",
     "puppeteer": "13.5.1",
-    "puppeteer-worker-job-builder": "^1.2.0-a.4",
+    "puppeteer-worker-job-builder": "^1.2.0-a.6",
     "yargs": "17.5.1"
   },
   "devDependencies": {

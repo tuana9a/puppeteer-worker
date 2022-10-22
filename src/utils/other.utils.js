@@ -6,3 +6,9 @@ module.exports.ensureDirExists = (dir) => {
     fs.mkdirSync(dir);
   }
 };
+
+module.exports.toPrettyErr = (err) => ({
+  name: err.name,
+  message: err.message,
+  stack: err.stack.split("\n"),
+});

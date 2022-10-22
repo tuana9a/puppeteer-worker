@@ -2,7 +2,6 @@
 /* eslint-disable import/no-dynamic-require */
 const fs = require("fs");
 const path = require("path");
-const { Job, isValidJob } = require("puppeteer-worker-job-builder/v1");
 
 class JobTemplateDb {
   db;
@@ -20,20 +19,16 @@ class JobTemplateDb {
   /**
    * if you has trouble in importing module see https://github.com/tuana9a/puppeteer-worker/blob/main/TROUBLESHOOTING.md#configjobimportprefix-explaination
    * @param {string} modulePath
-   * @param {string} jobKey
+   * @param {string} key
    * @param {string} importPrefix
    */
-  loadFromFile(modulePath, jobKey, importPrefix = "") {
+  loadFromFile(modulePath, key, importPrefix = "") {
     const db = this.getDb();
     const logger = this.getLogger();
     try {
       const job = require(path.join(importPrefix, modulePath));
-      if (isValidJob(job)) {
-        db.set(jobKey, job);
-        logger.info(`Job: Loaded: ${jobKey}`);
-      } else {
-        logger.warn(`Job: Invalid: ${jobKey}`);
-      }
+      db.set(key, job);
+      logger.info(`Job: Loaded: ${key}`);
     } catch (err) {
       logger.error(err);
     }

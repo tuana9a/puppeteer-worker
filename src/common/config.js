@@ -1,5 +1,3 @@
-const options = require("./puppeteer-launch-options");
-
 class Config {
   constructor() {
     this.configFile = undefined;

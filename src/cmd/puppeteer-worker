@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const yargs = require("yargs");
+
 const { launch } = require("../index");
 
 const cliParser = yargs
@@ -61,25 +62,19 @@ const cliParser = yargs
   });
 const options = cliParser.argv;
 
-async function main() {
-  const workerController = await launch({
-    configFile: options.configFile,
-    workerId: options.workerId,
-    workerType: options.workerType,
-    tmpDir: options.tmpDir, // tmp dir currently not used yet
-    logDest: options.logDest, // "fs" or "cs"
-    logDir: options.logDir,
-    secret: options.secret,
-    jobDir: options.jobDir,
-    httpWorkerPullConfigUrl: options.httpWorkerPullConfigUrl,
-    accessToken: options.accessToken,
-    jobImportPrefix: options.importPrefix, // the relative path from job-template.db.js
-    rabbitmqConnectionString: options.rabbitmq,
-    maxTry: options.maxTry,
-    puppeteerMode: options.mode, // "default", "headless", "visible", "docker"
-  });
-
-  workerController.auto().start();
-}
-
-main();
+launch({
+  configFile: options.configFile,
+  workerId: options.workerId,
+  workerType: options.workerType,
+  tmpDir: options.tmpDir, // tmp dir currently not used yet
+  logDest: options.logDest, // "fs" or "cs"
+  logDir: options.logDir,
+  secret: options.secret,
+  jobDir: options.jobDir,
+  httpWorkerPullConfigUrl: options.httpWorkerPullConfigUrl,
+  accessToken: options.accessToken,
+  jobImportPrefix: options.importPrefix, // the relative path from job-template.db.js
+  rabbitmqConnectionString: options.rabbitmq,
+  maxTry: options.maxTry,
+  puppeteerMode: options.mode, // "default", "headless", "visible", "docker"
+});

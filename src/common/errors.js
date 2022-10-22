@@ -12,22 +12,14 @@ class JobNotFoundError extends Error {
   }
 }
 
-class InvalidJobRequest extends Error {
-  constructor(jobRequest) {
-    super(`Inavlid Job Request: ${jobRequest}`);
+class InvalidJobError extends Error {
+  constructor(job) {
+    super(`Inavlid Job: ${job}`);
   }
 }
 
-/**
- *
- * @param {Error} err
- */
-function toErr(err) {
-  return {
-    name: err.name,
-    message: err.message,
-    stack: err.stack.split("\n"),
-  };
-}
-
-module.exports = { PuppeteerDisconnectedError, JobNotFoundError, InvalidJobRequest, toErr };
+module.exports = {
+  PuppeteerDisconnectedError,
+  JobNotFoundError,
+  InvalidJobError,
+};

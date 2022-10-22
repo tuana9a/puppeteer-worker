@@ -1,5 +1,5 @@
 const amqp = require("amqplib/callback_api");
-const { toErr } = require("../common/errors");
+const { toPrettyErr } = require("../utils/other.utils");
 const { toBuffer } = require("../common/payloads");
 
 const NEW_JOB_QUEUE = "jobs.new";
@@ -52,11 +52,11 @@ class RabbitMQWorker {
             try {
               const job = JSON.parse(msg.content.toString());
               logger.info(`Received: ${msg.fields.routingKey} ${JSON.stringify(job, null, 2)}`);
-              const logs = await jobRunner.do(job, { doing: doing });
+              const logs = await jobRunner.do(job);
               channel.sendToQueue(JOB_RESULT_QUEUE, toBuffer({ data: logs }));
             } catch (err) {
               logger.error(err);
-              channel.sendToQueue(JOB_RESULT_QUEUE, toBuffer({ err: toErr(err) }));
+              channel.sendToQueue(JOB_RESULT_QUEUE, toBuffer({ err: toPrettyErr(err) }));
             }
             channel.ack(msg);
           }, { noAck: false });

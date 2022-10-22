@@ -2,6 +2,8 @@ import {
   LaunchOptions,
   BrowserLaunchArgumentOptions,
   BrowserConnectOptions,
+  Browser,
+  Page
 } from "puppeteer";
 
 class Config {
@@ -33,6 +35,20 @@ class Config {
     };
 }
 
+class PuppeteerClient {
+  config: Config;
+
+  async launch(): Promise<PuppeteerClient>;
+
+  onDisconnect(handler: Function): PuppeteerClient;
+
+  getBrowser(): Browser;
+
+  async getPageByIndex(index: number): Promise<Page>;
+
+  async getFistPage(): Promise<Page>;
+}
+
 class RabbitMQWorker {
   constructor();
 
@@ -42,21 +58,21 @@ class RabbitMQWorker {
 }
 
 class HttpWorker {
-  async downloadJob(url: string, jobDir: string, headers?: any): void;
-  async start(): void;
+  async downloadJob(url: string, jobDir: string, headers?: any): Promise<void>;
+  async start(): Promise<void>;
 }
 
-export class WorkerController {
-  constructor(_config?: Config);
+class WorkerController {
+  constructor();
   loadConfig(_config?: Config): void;
-  prepareWorkspace(): void;
-  async boot(): void;
-  async start(): void;
-  async stop(): void;
+  prepareWorkDirs(): void;
+  prepareJobTemplate(): void;
+  exit(): void;
+  puppeteer(): PuppeteerClient;
   rabbit(): RabbitMQWorker;
   http(): HttpWorker;
   auto(): RabbitMQWorker | HttpWorker;
   getConfig(): Config;
 }
 
-export async function launch(_config: Config): Promise<WorkerController>;
+export async function launch(config: Config): Promise<WorkerController>;
