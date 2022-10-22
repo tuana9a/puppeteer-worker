@@ -1,5 +1,5 @@
 const fs = require("fs");
-const { toPrettyErr } = require("../utils/other.utils");
+const toPrettyErr = require("./toPrettyErr");
 
 class Logger {
   datetimeUtils;

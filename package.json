@@ -6,8 +6,8 @@
   "scripts": {
     "start": "src/cmd/puppeteer-worker --config-file config.json",
     "dev": "nodemon src/cmd/puppeteer-worker --config-file config.json",
-    "test:unit": "jest test/unit",
-    "test:ci": "jest test/ci"
+    "test": "jest test",
+    "test:watch": "jest --watch test"
   },
   "types": "./src/index.d.ts",
   "exports": "./src/index.js",

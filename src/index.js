@@ -1,17 +1,17 @@
 // eslint-disable-next-line import/no-unresolved
 const { IOCContainer } = require("@tuana9a/nanioc");
 
-const Loop = require("./common/loop");
-const JobRunner = require("./controllers/job-runner");
-const Logger = require("./common/logger");
-const DateTimeUtils = require("./utils/datetime.utils");
-const Config = require("./common/config");
-const PuppeteerClient = require("./controllers/puppeteer-client");
-const JobTemplateDb = require("./db/job-template.db");
-const WorkerController = require("./controllers/worker.controller");
-const HttpWorker = require("./workers/http-worker");
-const RabbitMQWorker = require("./workers/rabbitmq-worker");
-const { PuppeteerDisconnectedError } = require("./common/errors");
+const Loop = require("./common/Loop");
+const DoJob = require("./controllers/DoJob");
+const Logger = require("./common/Logger");
+const DateTimeUtils = require("./utils/DateTimeUtils");
+const Config = require("./common/Config");
+const PuppeteerClient = require("./controllers/PuppeteerClient");
+const JobTemplateDb = require("./db/JobTemplateDb");
+const WorkerController = require("./controllers/WorkerController");
+const HttpWorker = require("./workers/HttpWorker");
+const RabbitMQWorker = require("./workers/RabbitMQWorker");
+const PuppeteerDisconnectedError = require("./errors/PuppeteerDisconnectedError");
 
 async function launch(config) {
   const ioc = new IOCContainer({ getter: true });
@@ -19,7 +19,7 @@ async function launch(config) {
   ioc.addBean(DateTimeUtils, "datetimeUtils");
   ioc.addBean(Config, "config", { ignoreDeps: ["__all"] });
   ioc.addBean(PuppeteerClient, "puppeteerClient");
-  ioc.addBean(JobRunner, "jobRunner");
+  ioc.addBean(DoJob, "doJob");
   ioc.addBean(JobTemplateDb, "jobTemplateDb", { ignoreDeps: ["db"] });
   ioc.addBean(Loop, "loop");
   ioc.addBean(WorkerController, "workerController");

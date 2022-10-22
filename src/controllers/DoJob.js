@@ -2,11 +2,12 @@ const fs = require("fs");
 const _axios = require("axios");
 const FormData = require("form-data");
 
-const { JobNotFoundError, InvalidJobError } = require("../common/errors");
+const JobNotFoundError = require("../errors/JobNotFoundError");
+const InvalidJobError = require("../errors/InvalidJobError");
 
 const axios = _axios.default.create();
 
-class JobRunner {
+class DoJob {
   logger;
 
   puppeteerClient;
@@ -39,4 +40,4 @@ class JobRunner {
   }
 }
 
-module.exports = JobRunner;
+module.exports = DoJob;

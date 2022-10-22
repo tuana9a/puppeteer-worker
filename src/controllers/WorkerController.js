@@ -1,5 +1,4 @@
-const configUtils = require("../utils/config.utils");
-const { ensureDirExists } = require("../utils/other.utils");
+const ensureDirExists = require("../common/ensureDirExists");
 
 class WorkerController {
   logger;
@@ -19,10 +18,10 @@ class WorkerController {
       const logger = this.getLogger();
       const config = this.getConfig();
       if (_config.configFile) {
-        configUtils.updateFromFile(config, _config.configFile);
+        config.updateFromFile(_config.configFile);
       }
-      configUtils.updateFromObject(config, _config);
-      configUtils.setDefaultIfFalsy(config);
+      config.updateFromObject(_config);
+      config.setDefaultIfFalsy();
       logger.use(config.logDest);
       logger.info(config.toString());
     }
