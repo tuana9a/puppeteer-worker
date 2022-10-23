@@ -1,44 +1,40 @@
-const nanioc = require("@tuana9a/nanioc");
+// eslint-disable-next-line import/no-unresolved
+const { IOCContainer } = require("@tuana9a/nanioc");
 
-const Loop = require("./common/loop");
-const JobRunner = require("./controllers/job-runner");
-const Logger = require("./common/logger");
-const DateTimeUtils = require("./utils/datetime.utils");
-const Config = require("./common/config");
-const PuppeteerClient = require("./controllers/puppeteer-client");
-const JobTemplateDb = require("./db/job-template.db");
-const WorkerController = require("./controllers/worker.controller");
-const HttpWorker = require("./workers/http-worker");
-const RabbitMQWorker = require("./workers/rabbitmq-worker");
+const Loop = require("./common/Loop");
+const DoJob = require("./controllers/DoJob");
+const Logger = require("./common/Logger");
+const DateTimeUtils = require("./utils/DateTimeUtils");
+const Config = require("./common/Config");
+const PuppeteerClient = require("./controllers/PuppeteerClient");
+const JobTemplateDb = require("./db/JobTemplateDb");
+const WorkerController = require("./controllers/WorkerController");
+const HttpWorker = require("./workers/HttpWorker");
+const RabbitMQWorker = require("./workers/RabbitMQWorker");
+const PuppeteerDisconnectedError = require("./errors/PuppeteerDisconnectedError");
 
-async function launch(_config) {
-  const ioc = new nanioc.IOCContainer({
-    ignoreMissingBean: true,
-    getter: true,
-  });
-  ioc.addBean(Logger, "logger", {
-    auto: true,
-    ignoreDeps: ["logDir", "handler", "handlers"],
-  });
+async function launch(config) {
+  const ioc = new IOCContainer({ getter: true });
+  ioc.addBean(Logger, "logger", { ignoreDeps: ["logDir", "handler", "handlers"] });
   ioc.addBean(DateTimeUtils, "datetimeUtils");
-  ioc.addBean(Config, "config", { auto: true, ignoreDeps: ["__all"] });
+  ioc.addBean(Config, "config", { ignoreDeps: ["__all"] });
   ioc.addBean(PuppeteerClient, "puppeteerClient");
-  ioc.addBean(JobRunner, "jobRunner", { auto: true });
-  ioc.addBean(JobTemplateDb, "jobTemplateDb", {
-    auto: true,
-    ignoreDeps: ["db"],
-  });
+  ioc.addBean(DoJob, "doJob");
+  ioc.addBean(JobTemplateDb, "jobTemplateDb", { ignoreDeps: ["db"] });
   ioc.addBean(Loop, "loop");
-  ioc.addBean(WorkerController, "workerController", { auto: true });
-  ioc.addBean(HttpWorker, "httpWorker", { auto: true });
-  ioc.addBean(RabbitMQWorker, "rabbitWorker", { auto: true, ignoreDeps: "workerId" });
+  ioc.addBean(WorkerController, "workerController");
+  ioc.addBean(HttpWorker, "httpWorker");
+  ioc.addBean(RabbitMQWorker, "rabbitWorker", { ignoreDeps: ["workerId"] });
   ioc.di();
   const workerController = ioc.getBean("workerController").getInstance();
-  workerController.loadConfig(_config);
-  workerController.prepareWorkspace();
-  await workerController.boot();
+  workerController.loadConfig(config);
+  workerController.prepareWorkDirs();
+  workerController.prepareJobTemplate();
+  await workerController.puppeteer().launch();
+  workerController.puppeteer().onDisconnect(() => console.error(new PuppeteerDisconnectedError()));
+  workerController.puppeteer().onDisconnect(() => setTimeout(() => process.exit(0), 100));
+  await workerController.auto().start();
   return workerController;
 }
 
-module.exports.WorkerController = WorkerController;
 module.exports.launch = launch;

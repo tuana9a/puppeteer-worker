@@ -1,5 +1,5 @@
 const fs = require("fs");
-const { toErr } = require("./errors");
+const toPrettyErr = require("./toPrettyErr");
 
 class Logger {
   datetimeUtils;
@@ -68,7 +68,7 @@ class Logger {
    * @param {Error} err
    */
   error(err) {
-    this.log({ type: "ERROR", data: toErr(err) });
+    this.log({ type: "ERROR", data: toPrettyErr(err) });
   }
 
   /**

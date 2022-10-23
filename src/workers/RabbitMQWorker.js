@@ -1,6 +1,6 @@
 const amqp = require("amqplib/callback_api");
-const { toErr } = require("../common/errors");
-const { toBuffer } = require("../common/payloads");
+const toPrettyErr = require("../common/toPrettyErr");
+const toBuffer = require("../common/toBuffer");
 
 const NEW_JOB_QUEUE = "jobs.new";
 const JOB_RESULT_QUEUE = "jobs.result";
@@ -13,7 +13,7 @@ class RabbitMQWorker {
 
   logger;
 
-  jobRunner;
+  doJob;
 
   puppeteerClient;
 
@@ -25,7 +25,7 @@ class RabbitMQWorker {
     const logger = this.getLogger();
     const config = this.getConfig();
     const workerId = this.getWorkerId();
-    const jobRunner = this.getJobRunner();
+    const doJob = this.getDoJob();
 
     amqp.connect(config.rabbitmqConnectionString, (error0, connection) => {
       if (error0) {
@@ -52,11 +52,11 @@ class RabbitMQWorker {
             try {
               const job = JSON.parse(msg.content.toString());
               logger.info(`Received: ${msg.fields.routingKey} ${JSON.stringify(job, null, 2)}`);
-              const logs = await jobRunner.do(job, { doing: doing });
+              const logs = await doJob.do(job);
               channel.sendToQueue(JOB_RESULT_QUEUE, toBuffer({ data: logs }));
             } catch (err) {
               logger.error(err);
-              channel.sendToQueue(JOB_RESULT_QUEUE, toBuffer({ err: toErr(err) }));
+              channel.sendToQueue(JOB_RESULT_QUEUE, toBuffer({ err: toPrettyErr(err) }));
             }
             channel.ack(msg);
           }, { noAck: false });

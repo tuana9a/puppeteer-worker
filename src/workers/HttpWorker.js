@@ -1,8 +1,8 @@
 const _axios = require("axios");
 const path = require("path");
-const { toErr } = require("../common/errors");
+const { toErr } = require("../errors/InvalidJobError");
 
-const downloadUtils = require("../utils/download.utils");
+const downloadFile = require("../common/downloadFile");
 
 const axios = _axios.default.create();
 
@@ -13,7 +13,7 @@ class HttpWorker {
 
   logger;
 
-  jobRunner;
+  doJob;
 
   async downloadJobs(url, jobDir, headers = {}) {
     const logger = this.getLogger();
@@ -30,7 +30,7 @@ class HttpWorker {
       const { key, downloadUrl, fileName } = info;
       logger.info(`Downloading Job: ${key}`);
 
-      await downloadUtils.downloadFile(
+      await downloadFile(
         downloadUrl,
         path.join(jobDir, fileName),
         {
@@ -44,7 +44,7 @@ class HttpWorker {
     const config = this.getConfig();
     const loop = this.getLoop();
     const logger = this.getLogger();
-    const jobRunner = this.getJobRunner();
+    const doJob = this.getDoJob();
 
     const httpWorkerConfig = await axios.get(config.httpWorkerPullConfigUrl, {
       headers: {
@@ -52,7 +52,7 @@ class HttpWorker {
       },
     }).then((res) => res.data);
 
-    const { pollJobUrl, submitJobResultUrl } = httpWorkerConfig;
+    const { pollJobUrl, submitJobResultUrl, repeatPollJobsAfter } = httpWorkerConfig;
 
     loop.infinity(async () => {
       const job = await axios.get(pollJobUrl, { headers: { Authorization: config.accessToken } })
@@ -62,7 +62,7 @@ class HttpWorker {
       if (!job) return;
 
       try {
-        const logs = await jobRunner.do(job);
+        const logs = await doJob.do(job);
         axios.post(submitJobResultUrl, JSON.stringify({ data: logs }), {
           headers: {
             "Content-Type": "application/json",
@@ -78,7 +78,7 @@ class HttpWorker {
           },
         }).catch((err1) => logger.error(err1));
       }
-    }, config.repeatPollJobsAfter);
+    }, repeatPollJobsAfter);
   }
 }
 

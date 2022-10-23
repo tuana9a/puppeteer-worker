@@ -1,11 +1,9 @@
 const fs = require("fs");
 const axios = require("axios");
 
-const _axios = axios.default.create();
-
-module.exports.downloadFile = async (url, out, config = {}) => {
+module.exports = async (url, out, config = {}) => {
   const writer = fs.createWriteStream(out);
-  const response = await _axios.get(url, {
+  const response = await axios.get(url, {
     ...config,
     responseType: "stream",
   });

@@ -1,14 +1,15 @@
 const puppeteer = require("puppeteer");
 
 class PuppeteerClient {
-  /**
-   * @param {puppeteer.LaunchOptions} launchOption
-   */
-  async launch(launchOption, onDisconnect = null) {
-    this.browser = await puppeteer.launch(launchOption);
-    if (onDisconnect) {
-      this.browser.on("disconnected", onDisconnect);
-    }
+  config;
+
+  async launch() {
+    this.browser = await puppeteer.launch(this.config.puppeteerLaunchOption);
+    return this;
+  }
+
+  onDisconnect(handler) {
+    this.browser.on("disconnected", handler);
     return this;
   }
 
