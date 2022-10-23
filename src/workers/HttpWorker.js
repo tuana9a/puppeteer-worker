@@ -52,7 +52,7 @@ class HttpWorker {
       },
     }).then((res) => res.data);
 
-    const { pollJobUrl, submitJobResultUrl } = httpWorkerConfig;
+    const { pollJobUrl, submitJobResultUrl, repeatPollJobsAfter } = httpWorkerConfig;
 
     loop.infinity(async () => {
       const job = await axios.get(pollJobUrl, { headers: { Authorization: config.accessToken } })
@@ -78,7 +78,7 @@ class HttpWorker {
           },
         }).catch((err1) => logger.error(err1));
       }
-    }, config.repeatPollJobsAfter);
+    }, repeatPollJobsAfter);
   }
 }
 

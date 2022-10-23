@@ -22,7 +22,6 @@ class Config {
   jobImportPrefix: string;
 
   httpWorkerPullConfigUrl: string;
-  repeatPollJobsAfter: Number;
 
   rabbitmqConnectionString: string;
 

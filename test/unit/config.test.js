@@ -16,7 +16,6 @@ describe("test config", () => {
       accessToken: undefined,
       httpWorkerPullConfigUrl: undefined,
       jobImportPrefix: "../../",
-      repeatPollJobsAfter: 5000,
       rabbitmqConnectionString: undefined,
       maxTry: 10,
       puppeteerMode: "default",
@@ -37,7 +36,6 @@ describe("test config", () => {
       secret: "iloveyou",
       maxTry: 11,
       puppeteerMode: "visible",
-      repeatPollJobsAfter: 5000,
     });
     expect(config.toSimpleObject()).toEqual({
       configFile: undefined,
@@ -49,7 +47,6 @@ describe("test config", () => {
       accessToken: undefined,
       httpWorkerPullConfigUrl: undefined,
       rabbitmqConnectionString: undefined,
-      repeatPollJobsAfter: 5000,
       jobImportPrefix: undefined,
       maxTry: 11,
       puppeteerMode: "visible",

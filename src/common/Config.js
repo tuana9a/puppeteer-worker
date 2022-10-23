@@ -21,7 +21,6 @@ class Config {
     this.jobImportPrefix = undefined;
 
     this.httpWorkerPullConfigUrl = undefined;
-    this.repeatPollJobsAfter = undefined;
 
     this.rabbitmqConnectionString = undefined;
 
@@ -53,7 +52,6 @@ class Config {
         }
       }
       this.maxTry = parseInt(this.maxTry);
-      this.repeatPollJobsAfter = parseInt(this.repeatPollJobsAfter);
       this.puppeteerLaunchOption = options.get(this.puppeteerMode);
     }
     return this;
@@ -76,7 +74,6 @@ class Config {
     this.logDir = this.logDir || "./logs/";
     this.logDest = this.logDest || "cs";
     this.maxTry = parseInt(this.maxTry) || 10;
-    this.repeatPollJobsAfter = parseInt(this.repeatPollJobsAfter) || 5000;
     this.puppeteerMode = this.puppeteerMode || process.env.PUPPETEER_MODE || "default";
     this.puppeteerLaunchOption = options.get(this.puppeteerMode);
     return this;

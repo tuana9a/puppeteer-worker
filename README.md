@@ -25,16 +25,9 @@ const workerController = launch({
   // jobDir: "./jobs/", // job dir default is equal to tmpDir
   // jobImportPrefix: "../../", // relative path from job-template.db.js
   // httpWorkerPullConfigUrl: "http://localhost:8080/api/jobs",
-  // repeatPollJobsAfter: 5000, // 5 seconds
   // puppeteerMode: "headless", // "default", "headless", "visible", "docker"
   // rabbitmqConnectionString: "amqp://localhost:5672"
 });
-
-workerController.http().start();
-// or
-workerController.rabbit().start();
-// or auto base on config
-workerController.auto().start();
 ```
 
 start with bash
