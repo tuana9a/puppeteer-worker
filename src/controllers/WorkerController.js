@@ -31,13 +31,12 @@ class WorkerController {
     const config = this.getConfig();
     ensureDirExists(config.tmpDir);
     ensureDirExists(config.logDir);
-    ensureDirExists(config.jobDir);
   }
 
   prepareJobTemplate() {
     const config = this.getConfig();
     const jobTemplateDb = this.getJobTemplateDb();
-    jobTemplateDb.loadFromDir(config.jobDir, config.jobImportPrefix);
+    jobTemplateDb.loadFromDir(config.jobDir);
   }
 
   puppeteer() {

@@ -15,7 +15,6 @@ describe("test config", () => {
       jobDir: "./jobs/",
       accessToken: undefined,
       httpWorkerPullConfigUrl: undefined,
-      jobImportPrefix: "../../",
       rabbitmqConnectionString: undefined,
       maxTry: 10,
       puppeteerMode: "default",
@@ -47,7 +46,6 @@ describe("test config", () => {
       accessToken: undefined,
       httpWorkerPullConfigUrl: undefined,
       rabbitmqConnectionString: undefined,
-      jobImportPrefix: undefined,
       maxTry: 11,
       puppeteerMode: "visible",
       puppeteerLaunchOption: {

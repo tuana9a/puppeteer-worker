@@ -16,11 +16,6 @@ const cliParser = yargs
     type: "string",
     requiresArg: false,
   })
-  .option("import-prefix", {
-    type: "string",
-    description: "import prefix string from jobDir",
-    requiresArg: false,
-  })
   .option("mode", {
     type: "string",
     requiresArg: false,
@@ -73,7 +68,6 @@ launch({
   jobDir: options.jobDir,
   httpWorkerPullConfigUrl: options.httpWorkerPullConfigUrl,
   accessToken: options.accessToken,
-  jobImportPrefix: options.importPrefix, // the relative path from job-template.db.js
   rabbitmqConnectionString: options.rabbitmq,
   maxTry: options.maxTry,
   puppeteerMode: options.mode, // "default", "headless", "visible", "docker"

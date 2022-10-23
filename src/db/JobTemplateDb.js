@@ -2,6 +2,7 @@
 /* eslint-disable import/no-dynamic-require */
 const fs = require("fs");
 const path = require("path");
+const JobDirNotExistsError = require("../errors/JobDirNotExistError");
 
 class JobTemplateDb {
   db;
@@ -17,32 +18,33 @@ class JobTemplateDb {
   }
 
   /**
-   * if you has trouble in importing module see https://github.com/tuana9a/puppeteer-worker/blob/main/TROUBLESHOOTING.md#configjobimportprefix-explaination
-   * @param {string} modulePath
-   * @param {string} key
+   * if you has trouble in importing module see https://github.com/tuana9a/puppeteer-worker/blob/main/TROUBLESHOOTING.md
+   * @param {string} filepath
+   * @param {string} jobName
    * @param {string} importPrefix
    */
-  loadFromFile(modulePath, key, importPrefix = "") {
+  loadFromFile(filepath, jobName) {
     const db = this.getDb();
     const logger = this.getLogger();
     try {
-      const job = require(path.join(importPrefix, modulePath));
-      db.set(key, job);
-      logger.info(`Job: Loaded: ${key}`);
+      const jobTemplate = require(filepath);
+      db.set(jobName, jobTemplate);
+      logger.info(`Job: loaded: "${jobName}" -> "${filepath}"`);
     } catch (err) {
       logger.error(err);
     }
   }
 
-  loadFromDir(rootPath, importPrefix = "") {
-    const childPaths = fs
-      .readdirSync(rootPath)
-      .filter((x) => x.endsWith(".js"));
-    for (const childPath of childPaths) {
-      const _childPath = path.join(rootPath, childPath);
-      const lengthOfJs = ".js".length;
-      const jobKey = childPath.slice(0, -lengthOfJs);
-      this.loadFromFile(_childPath, jobKey, importPrefix);
+  loadFromDir(rootPath) {
+    const lengthOfJs = ".js".length;
+    if (!fs.existsSync(rootPath)) {
+      throw new JobDirNotExistsError(rootPath);
+    }
+    const files = fs.readdirSync(rootPath).filter((x) => x.endsWith(".js"));
+    for (const filepath of files) {
+      const absoluteFilepath = path.resolve(rootPath, filepath);
+      const jobName = filepath.slice(0, -(lengthOfJs));
+      this.loadFromFile(absoluteFilepath, jobName);
     }
   }
 

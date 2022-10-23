@@ -1,22 +1,23 @@
-# config.jobImportPrefix explaination
+# config.jobDir explaination
 
 The project structure look like
 
 ```
 | -- jobs/
-|      | -- job1.js
-|      | -- job2.js
+|      | -- Job1.js
+|      | -- Job2.js
 | -- src/
-       | -- common/
-       | -- db/
-       |     | -- job-template.db.js
-    ...etc
+|      | -- common/
+|      | -- db/
+|      |     | -- JobTemplateDb.js
+
+(...)
 ```
 
-so if `job-template.db.js` needs to **import** or **require(modulepath)** it need to add prefix to the module path, for example
+so if `JobTemplateDb.js` needs to **import** or **require**, it need to add prefix to the module path, for example
 
 ```js
-// job-template.db.js
+// JobTemplateDb.js
 const job1 = require("./jobs/job1"); // not work
 
 // adding "../../"
@@ -32,12 +33,13 @@ There will be much more **"`../`"**
 |      | -- job1.js
 |      | -- job2.js
 | -- node_modules/
-        | -- puppeteer-worker
-                | -- src/
-                    | -- common/
-                    | -- controllers/
-                    |     | -- job-template.db.js
-                    ...etc
+|      | -- puppeteer-worker
+|             | -- src/
+|                    | -- common/
+|                    | -- db/
+|                    |     | -- JobTemplateDb.js
+
+(...)
 ```
 
 ```js
@@ -47,4 +49,6 @@ const job1 = require("../../jobs/job1"); // not work anymore
 const job1 = require("../../../../jobs/job1"); // work
 ```
 
-I suggest using absolute path like `~/Projects/puppeteer-worker` or `/home/tuana9a/Projects/puppeteer-worker` for simplicity
+For simplicity using absolute path: `~/Projects/puppeteer-worker`
+
+in my laptop: `/home/tuana9a/Projects/puppeteer-worker`

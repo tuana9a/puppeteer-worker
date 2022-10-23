@@ -19,7 +19,6 @@ class Config {
   maxTry: Number;
 
   jobDir: string;
-  jobImportPrefix: string;
 
   httpWorkerPullConfigUrl: string;
 
