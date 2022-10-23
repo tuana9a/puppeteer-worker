@@ -11,6 +11,7 @@ const JobTemplateDb = require("./db/JobTemplateDb");
 const WorkerController = require("./controllers/WorkerController");
 const HttpWorker = require("./workers/HttpWorker");
 const RabbitMQWorker = require("./workers/RabbitMQWorker");
+const StandaloneWorker = require("./workers/StandaloneWorker");
 const PuppeteerDisconnectedError = require("./errors/PuppeteerDisconnectedError");
 
 async function launch(config) {
@@ -25,6 +26,7 @@ async function launch(config) {
   ioc.addBean(WorkerController, "workerController");
   ioc.addBean(HttpWorker, "httpWorker");
   ioc.addBean(RabbitMQWorker, "rabbitWorker", { ignoreDeps: ["workerId"] });
+  ioc.addBean(StandaloneWorker, "standaloneWorker");
   ioc.di();
   const workerController = ioc.getBean("workerController").getInstance();
   workerController.loadConfig(config);

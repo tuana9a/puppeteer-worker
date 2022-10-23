@@ -3,6 +3,7 @@ jobs/
 logs/
 test/
 tmp/
+schedules/
 .env
 Dockerfile
 nodemon.json

@@ -18,6 +18,7 @@ class Config {
     this.maxTry = undefined;
 
     this.jobDir = undefined;
+    this.scheduleDir = undefined;
 
     this.httpWorkerPullConfigUrl = undefined;
 
@@ -69,6 +70,7 @@ class Config {
     this.rabbitmqConnectionString = this.rabbitmqConnectionString || process.env.RABBITMQ_CONNECTION_STRING;
     this.tmpDir = this.tmpDir || "./tmp/";
     this.jobDir = this.jobDir || process.env.JOB_DIR || process.env.JOBS_DIR || "./jobs/";
+    this.scheduleDir = this.scheduleDir || process.env.SCHEDULE_DIR || "./schedules/";
     this.logDir = this.logDir || "./logs/";
     this.logDest = this.logDest || "cs";
     this.maxTry = parseInt(this.maxTry) || 10;

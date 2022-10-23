@@ -1,8 +1,7 @@
 const _axios = require("axios");
 const path = require("path");
-const { toErr } = require("../errors/InvalidJobError");
-
 const downloadFile = require("../common/downloadFile");
+const toPrettyErr = require("../common/toPrettyErr");
 
 const axios = _axios.default.create();
 
@@ -77,7 +76,7 @@ class HttpWorker {
         }).catch((err) => logger.error(err));
       } catch (err) {
         logger.error(err);
-        const body = { workerId: workerId, err: toErr(err) };
+        const body = { workerId: workerId, err: toPrettyErr(err) };
         axios.post(submitJobResultUrl, JSON.stringify(body), {
           headers: {
             "Content-Type": "application/json",

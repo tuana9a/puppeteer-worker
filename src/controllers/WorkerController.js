@@ -1,4 +1,5 @@
 const ensureDirExists = require("../common/ensureDirExists");
+const InvalidWorkerTypeError = require("../errors/InvalidWorkerTypeError");
 
 class WorkerController {
   logger;
@@ -10,6 +11,8 @@ class WorkerController {
   httpWorker;
 
   rabbitWorker;
+
+  standaloneWorker;
 
   puppeteerClient;
 
@@ -44,6 +47,9 @@ class WorkerController {
   }
 
   auto() {
+    if (!this[this.config.workerType]) {
+      throw new InvalidWorkerTypeError(this.config.workerType);
+    }
     return this[this.config.workerType]();
   }
 
@@ -53,6 +59,10 @@ class WorkerController {
 
   http() {
     return this.getHttpWorker();
+  }
+
+  standalone() {
+    return this.getStandaloneWorker();
   }
 
   exit() {

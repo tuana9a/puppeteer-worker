@@ -9,7 +9,7 @@ const cliParser = yargs
   .option("worker-type", {
     type: "string",
     requiresArg: false,
-    choices: ["http", "rabbit"],
+    choices: ["http", "rabbit", "standalone"],
   })
   .option("rabbitmq", {
     describe: "the rabbitmq connection string",
@@ -28,6 +28,10 @@ const cliParser = yargs
     choices: ["cs", "fs"],
   })
   .option("log-dir", {
+    type: "string",
+    requiresArg: false,
+  })
+  .option("schedule-dir", {
     type: "string",
     requiresArg: false,
   })
@@ -66,6 +70,7 @@ launch({
   logDir: options.logDir,
   secret: options.secret,
   jobDir: options.jobDir,
+  scheduleDir: options.scheduleDir,
   httpWorkerPullConfigUrl: options.httpWorkerPullConfigUrl,
   accessToken: options.accessToken,
   rabbitmqConnectionString: options.rabbitmq,
