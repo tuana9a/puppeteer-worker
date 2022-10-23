@@ -15,6 +15,10 @@ class HttpWorker {
 
   doJob;
 
+  getWorkerId() {
+    return this.config.workerId;
+  }
+
   async downloadJobs(url, jobDir, headers = {}) {
     const logger = this.getLogger();
 
@@ -44,6 +48,7 @@ class HttpWorker {
     const config = this.getConfig();
     const loop = this.getLoop();
     const logger = this.getLogger();
+    const workerId = this.getWorkerId();
     const doJob = this.getDoJob();
 
     const httpWorkerConfig = await axios.get(config.httpWorkerPullConfigUrl, {
@@ -63,7 +68,8 @@ class HttpWorker {
 
       try {
         const logs = await doJob.do(job);
-        axios.post(submitJobResultUrl, JSON.stringify({ data: logs }), {
+        const body = { id: job.id, workerId: workerId, logs: logs };
+        axios.post(submitJobResultUrl, JSON.stringify(body), {
           headers: {
             "Content-Type": "application/json",
             Authorization: config.accessToken,
@@ -71,7 +77,8 @@ class HttpWorker {
         }).catch((err) => logger.error(err));
       } catch (err) {
         logger.error(err);
-        axios.post(submitJobResultUrl, JSON.stringify({ err: toErr(err) }), {
+        const body = { workerId: workerId, err: toErr(err) };
+        axios.post(submitJobResultUrl, JSON.stringify(body), {
           headers: {
             "Content-Type": "application/json",
             Authorization: config.accessToken,

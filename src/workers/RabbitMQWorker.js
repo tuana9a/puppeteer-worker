@@ -2,11 +2,11 @@ const amqp = require("amqplib/callback_api");
 const toPrettyErr = require("../common/toPrettyErr");
 const toBuffer = require("../common/toBuffer");
 
-const NEW_JOB_QUEUE = "jobs.new";
-const JOB_RESULT_QUEUE = "jobs.result";
-const WORKER_FEEDBACK_EXCHANGE = "worker.feedback";
-const DOING_ROUTING_KEY = "doing";
-const PING_ROUTING_KEY = "ping";
+const NEW_JOB = "jobs.new";
+const JOB_RESULT = "jobs.result";
+const WORKER_FEEDBACK = "worker.feedback";
+const DOING = "doing";
+const PING = "ping";
 
 class RabbitMQWorker {
   config;
@@ -37,12 +37,12 @@ class RabbitMQWorker {
           logger.error(error1);
           return;
         }
-        const doing = (data) => channel.publish(WORKER_FEEDBACK_EXCHANGE, DOING_ROUTING_KEY, toBuffer({ workerId: workerId, data: data }));
+        const doing = (data) => channel.publish(WORKER_FEEDBACK, DOING, toBuffer({ workerId: workerId, data: data }));
 
         channel.prefetch(1);
-        channel.assertExchange(WORKER_FEEDBACK_EXCHANGE, "topic", { durable: false });
-        channel.assertQueue(JOB_RESULT_QUEUE);
-        channel.assertQueue(NEW_JOB_QUEUE, null, (error2, q) => {
+        channel.assertExchange(WORKER_FEEDBACK, "topic", { durable: false });
+        channel.assertQueue(JOB_RESULT);
+        channel.assertQueue(NEW_JOB, null, (error2, q) => {
           if (error2) {
             logger.error(error2);
             return;
@@ -53,16 +53,23 @@ class RabbitMQWorker {
               const job = JSON.parse(msg.content.toString());
               logger.info(`Received: ${msg.fields.routingKey} ${JSON.stringify(job, null, 2)}`);
               const logs = await doJob.do(job);
-              channel.sendToQueue(JOB_RESULT_QUEUE, toBuffer({ data: logs }));
+              channel.sendToQueue(JOB_RESULT, toBuffer({
+                id: job.id,
+                workerId: workerId,
+                logs: logs,
+              }));
             } catch (err) {
               logger.error(err);
-              channel.sendToQueue(JOB_RESULT_QUEUE, toBuffer({ err: toPrettyErr(err) }));
+              channel.sendToQueue(JOB_RESULT, toBuffer({
+                workerId: workerId,
+                err: toPrettyErr(err),
+              }));
             }
             channel.ack(msg);
           }, { noAck: false });
         });
         setInterval(() => {
-          channel.publish(WORKER_FEEDBACK_EXCHANGE, PING_ROUTING_KEY, toBuffer({ workerId: workerId }));
+          channel.publish(WORKER_FEEDBACK, PING, toBuffer({ workerId: workerId }));
         }, 3000);
       });
     });
