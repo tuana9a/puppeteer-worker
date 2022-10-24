@@ -7,7 +7,7 @@
     "watch": [
         "src/",
         ".env",
-        "*.conf.*",
+        "config.json",
         "nodemon.json"
     ]
 }

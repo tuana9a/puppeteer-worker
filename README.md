@@ -1,6 +1,6 @@
 # puppeteer-worker
 
-a simple [puppeteer](https://github.com/puppeteer/puppeteer) worker will poll jobs every seconds from server to run then submit result back
+a simple [puppeteer](https://github.com/puppeteer/puppeteer) worker that runs [job](https://github.com/tuana9a/puppeteer-worker-job-builder)
 
 # Installing
 
@@ -10,26 +10,25 @@ Using npm:
 npm install puppeteer-worker
 ```
 
-# Example
+# Basic Usage
 
-basic
+For `config.jobDir` see [TROUBLESHOOTING](./TROUBLESHOOTING.md)
 
 ```js
-const { PuppeteerWorker } = require("puppeteer-worker");
+const { launch } = require("puppeteer-worker");
 
-new PuppeteerWorker({
-  // tmpDir: "./.tmp/", // tmp dir for storing things
+const workerController = launch({
+  // workerType: "http", // "http" or "rabbit"
+  // tmpDir: "./tmp/", // tmp dir for storing things
   // logDest: "cs", // log destinantion can be file or console: "fs", "cs"
   // logDir: "./logs/", log directory
-  // secret: "tuana9a", // worker secret
   // accessToken: "tuana9a", // control plane access token
   // maxTry: 10,
-  // jobDir: "./.tmp/", // job dir default is equal to tmpDir
-  // jobImportPrefix: "../../", // relative path from job-template.db.js
-  // controlPlaneUrl: "http://localhost:8080/api/jobs",
-  // repeatPollJobsAfter: 5000, // 5 seconds
+  // jobDir: "./jobs/", // job dir default is equal to tmpDir
+  // httpWorkerPullConfigUrl: "http://localhost:8080/api/jobs",
   // puppeteerMode: "headless", // "default", "headless", "visible", "docker"
-}).start();
+  // rabbitmqConnectionString: "amqp://localhost:5672"
+});
 ```
 
 start with bash
@@ -43,7 +42,3 @@ see help for details
 ```bash
 ./node_modules/.bin/puppeteer-worker --help
 ```
-
-## **Note**
-
-for config.jobImportPrefix see [troubleshooting](./troubleshooting.md#configjobimportprefix-explaination)

@@ -1,19 +1,21 @@
-const Config = require("../../src/common/config");
-const configUtils = require("../../src/common/config.utils");
+const Config = require("../../src/common/Config");
 
 describe("test config", () => {
   test("should match default value", () => {
     const config = new Config();
-    expect(config.toObj()).toEqual({
-      tmpDir: "./.tmp/",
+    config.setDefaultIfFalsy();
+    expect(config.toSimpleObject()).toEqual({
+      configFile: undefined,
+      workerId: expect.any(String),
+      workerType: "http",
+      tmpDir: "./tmp/",
       logDest: "cs",
       logDir: "./logs/",
       secret: undefined,
-      jobDir: "./.tmp/",
+      jobDir: "./jobs/",
       accessToken: undefined,
-      controlPlaneUrl: undefined,
-      jobImportPrefix: "",
-      repeatPollJobsAfter: 5000,
+      httpWorkerPullConfigUrl: undefined,
+      rabbitmqConnectionString: undefined,
       maxTry: 10,
       puppeteerMode: "default",
       puppeteerLaunchOption: {
@@ -28,22 +30,22 @@ describe("test config", () => {
 
   test("should match updated value", () => {
     const config = new Config();
-    configUtils.loadFromObject({
-      tmpDir: ".tmp/",
+    config.updateFromObject({
+      tmpDir: "otherTmpDir",
       secret: "iloveyou",
       maxTry: 11,
       puppeteerMode: "visible",
-    }, config);
-    expect(config.toObj()).toEqual({
-      tmpDir: ".tmp/",
-      logDest: "cs",
-      logDir: "./logs/",
+    });
+    expect(config.toSimpleObject()).toEqual({
+      configFile: undefined,
+      tmpDir: "otherTmpDir",
+      logDest: undefined,
+      logDir: undefined,
       secret: "iloveyou",
-      jobDir: "./.tmp/",
+      jobDir: undefined,
       accessToken: undefined,
-      controlPlaneUrl: undefined,
-      jobImportPrefix: "",
-      repeatPollJobsAfter: 5000,
+      httpWorkerPullConfigUrl: undefined,
+      rabbitmqConnectionString: undefined,
       maxTry: 11,
       puppeteerMode: "visible",
       puppeteerLaunchOption: {

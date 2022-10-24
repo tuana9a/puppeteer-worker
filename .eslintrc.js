@@ -22,5 +22,6 @@ module.exports = {
     "object-shorthand": "off",
     "operator-linebreak": "warn",
     "no-underscore-dangle": "off",
+    "no-unused-vars": "warn",
   },
 };

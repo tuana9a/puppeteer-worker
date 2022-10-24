@@ -1,6 +1,6 @@
-const t = new Map();
+const options = new Map();
 
-t.set("default", {
+options.set("default", {
   // default run in headless mode
   slowMo: 10,
   defaultViewport: {
@@ -9,7 +9,7 @@ t.set("default", {
   },
 });
 
-t.set("headless", {
+options.set("headless", {
   slowMo: 10,
   defaultViewport: {
     width: 1920,
@@ -17,13 +17,13 @@ t.set("headless", {
   },
 });
 
-t.set("visible", {
+options.set("visible", {
   headless: false,
   slowMo: 10,
   defaultViewport: null,
 });
 
-t.set("docker", {
+options.set("docker", {
   slowMo: 10,
   defaultViewport: {
     width: 1920,
@@ -33,5 +33,4 @@ t.set("docker", {
   args: ["--no-sandbox", "--disable-setuid-sandbox"],
 });
 
-module.exports.get = (key) => t.get(key);
-module.exports.getWithDefault = (key) => t.get(key) || t.get("default");
+module.exports = options;

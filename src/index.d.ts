@@ -2,26 +2,30 @@ import {
   LaunchOptions,
   BrowserLaunchArgumentOptions,
   BrowserConnectOptions,
+  Browser,
+  Page
 } from "puppeteer";
 
 class Config {
-  tmpDir: String = "./.tmp/";
+  workerType: string;
+  tmpDir: string;
 
-  logDest: String = "cs";
-  logDir: String = "./logs/";
+  logDest: string;
+  logDir: string;
 
-  secret: String = undefined;
-  accessToken: String = undefined;
+  secret: string;
+  accessToken: string;
 
-  maxTry: Number = 10;
+  maxTry: Number;
 
-  jobDir: String = "./.tmp/";
-  jobImportPrefix: String = "";
+  jobDir: string;
+  scheduleDir: string;
 
-  controlPlaneUrl: String = undefined;
-  repeatPollJobsAfter: Number = 5000;
+  httpWorkerPullConfigUrl: string;
 
-  puppeteerMode: String = "default";
+  rabbitmqConnectionString: string;
+
+  puppeteerMode: string;
   puppeteerLaunchOption: LaunchOptions &
     BrowserLaunchArgumentOptions &
     BrowserConnectOptions & {
@@ -30,8 +34,49 @@ class Config {
     };
 }
 
-export class PuppeteerWorker {
-  constructor(__config?: Config);
-  async start(__config?: Config): void;
+class PuppeteerClient {
+  config: Config;
+
+  async launch(): Promise<PuppeteerClient>;
+
+  onDisconnect(handler: Function): PuppeteerClient;
+
+  getBrowser(): Browser;
+
+  async getPageByIndex(index: number): Promise<Page>;
+
+  async getFistPage(): Promise<Page>;
+}
+
+class RabbitMQWorker {
+  constructor();
+
+  getWorkerId(): string;
+
+  start(): void;
+}
+
+class HttpWorker {
+  async downloadJob(url: string, jobDir: string, headers?: any): Promise<void>;
+  async start(): Promise<void>;
+}
+
+class StandaloneWorker {
+  async start(): Promise<void>;
+}
+
+class WorkerController {
+  constructor();
+  loadConfig(_config?: Config): void;
+  prepareWorkDirs(): void;
+  prepareJobTemplate(): void;
+  exit(): void;
+  puppeteer(): PuppeteerClient;
+  rabbit(): RabbitMQWorker;
+  http(): HttpWorker;
+  standalone(): StandaloneWorker;
+  auto(): RabbitMQWorker | HttpWorker | StandaloneWorker;
   getConfig(): Config;
 }
+
+export async function launch(config: Config): Promise<WorkerController>;

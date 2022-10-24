@@ -27,12 +27,11 @@ WORKDIR /app
 
 COPY package.json .
 
-COPY package-lock.json .
-
 RUN npm install --only=production
+
+# placeholder to config.json
+RUN echo {} > config.json
 
 COPY src/ src/
 
-RUN npm install .
-
-CMD ["./node_modules/.bin/puppeteer-worker", ""]
+CMD ["src/cmd/puppeteer-worker", "--config-file", "config.json", "--mode", "docker"]
