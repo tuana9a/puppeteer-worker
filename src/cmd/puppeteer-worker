@@ -9,16 +9,11 @@ const cliParser = yargs
   .option("worker-type", {
     type: "string",
     requiresArg: false,
-    choices: ["http", "rabbit"],
+    choices: ["http", "rabbit", "standalone"],
   })
   .option("rabbitmq", {
     describe: "the rabbitmq connection string",
     type: "string",
-    requiresArg: false,
-  })
-  .option("import-prefix", {
-    type: "string",
-    description: "import prefix string from jobDir",
     requiresArg: false,
   })
   .option("mode", {
@@ -33,6 +28,10 @@ const cliParser = yargs
     choices: ["cs", "fs"],
   })
   .option("log-dir", {
+    type: "string",
+    requiresArg: false,
+  })
+  .option("schedule-dir", {
     type: "string",
     requiresArg: false,
   })
@@ -71,9 +70,9 @@ launch({
   logDir: options.logDir,
   secret: options.secret,
   jobDir: options.jobDir,
+  scheduleDir: options.scheduleDir,
   httpWorkerPullConfigUrl: options.httpWorkerPullConfigUrl,
   accessToken: options.accessToken,
-  jobImportPrefix: options.importPrefix, // the relative path from job-template.db.js
   rabbitmqConnectionString: options.rabbitmq,
   maxTry: options.maxTry,
   puppeteerMode: options.mode, // "default", "headless", "visible", "docker"

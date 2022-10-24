@@ -12,6 +12,8 @@ npm install puppeteer-worker
 
 # Basic Usage
 
+For `config.jobDir` see [TROUBLESHOOTING](./TROUBLESHOOTING.md)
+
 ```js
 const { launch } = require("puppeteer-worker");
 
@@ -23,7 +25,6 @@ const workerController = launch({
   // accessToken: "tuana9a", // control plane access token
   // maxTry: 10,
   // jobDir: "./jobs/", // job dir default is equal to tmpDir
-  // jobImportPrefix: "../../", // relative path from job-template.db.js
   // httpWorkerPullConfigUrl: "http://localhost:8080/api/jobs",
   // puppeteerMode: "headless", // "default", "headless", "visible", "docker"
   // rabbitmqConnectionString: "amqp://localhost:5672"
@@ -41,7 +42,3 @@ see help for details
 ```bash
 ./node_modules/.bin/puppeteer-worker --help
 ```
-
-# **Related**
-
-For `config.jobImportPrefix` see [troubleshooting](./troubleshooting.md#configjobimportprefix-explaination)

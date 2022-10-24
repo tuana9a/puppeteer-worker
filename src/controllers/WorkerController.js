@@ -1,4 +1,5 @@
 const ensureDirExists = require("../common/ensureDirExists");
+const InvalidWorkerTypeError = require("../errors/InvalidWorkerTypeError");
 
 class WorkerController {
   logger;
@@ -10,6 +11,8 @@ class WorkerController {
   httpWorker;
 
   rabbitWorker;
+
+  standaloneWorker;
 
   puppeteerClient;
 
@@ -31,13 +34,12 @@ class WorkerController {
     const config = this.getConfig();
     ensureDirExists(config.tmpDir);
     ensureDirExists(config.logDir);
-    ensureDirExists(config.jobDir);
   }
 
   prepareJobTemplate() {
     const config = this.getConfig();
     const jobTemplateDb = this.getJobTemplateDb();
-    jobTemplateDb.loadFromDir(config.jobDir, config.jobImportPrefix);
+    jobTemplateDb.loadFromDir(config.jobDir);
   }
 
   puppeteer() {
@@ -45,6 +47,9 @@ class WorkerController {
   }
 
   auto() {
+    if (!this[this.config.workerType]) {
+      throw new InvalidWorkerTypeError(this.config.workerType);
+    }
     return this[this.config.workerType]();
   }
 
@@ -54,6 +59,10 @@ class WorkerController {
 
   http() {
     return this.getHttpWorker();
+  }
+
+  standalone() {
+    return this.getStandaloneWorker();
   }
 
   exit() {

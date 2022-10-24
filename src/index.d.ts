@@ -19,7 +19,7 @@ class Config {
   maxTry: Number;
 
   jobDir: string;
-  jobImportPrefix: string;
+  scheduleDir: string;
 
   httpWorkerPullConfigUrl: string;
 
@@ -61,6 +61,10 @@ class HttpWorker {
   async start(): Promise<void>;
 }
 
+class StandaloneWorker {
+  async start(): Promise<void>;
+}
+
 class WorkerController {
   constructor();
   loadConfig(_config?: Config): void;
@@ -70,7 +74,8 @@ class WorkerController {
   puppeteer(): PuppeteerClient;
   rabbit(): RabbitMQWorker;
   http(): HttpWorker;
-  auto(): RabbitMQWorker | HttpWorker;
+  standalone(): StandaloneWorker;
+  auto(): RabbitMQWorker | HttpWorker | StandaloneWorker;
   getConfig(): Config;
 }
 
