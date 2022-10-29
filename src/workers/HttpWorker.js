@@ -2,15 +2,13 @@ const _axios = require("axios");
 const path = require("path");
 const downloadFile = require("../common/downloadFile");
 const toPrettyErr = require("../common/toPrettyErr");
+const loop = require("../common/loop");
+const logger = require("../loggers/logger");
 
 const axios = _axios.default.create();
 
 class HttpWorker {
   config;
-
-  loop;
-
-  logger;
 
   doJob;
 
@@ -19,8 +17,6 @@ class HttpWorker {
   }
 
   async downloadJobs(url, jobDir, headers = {}) {
-    const logger = this.getLogger();
-
     const response = await axios
       .get(url, {
         headers: headers,
@@ -45,8 +41,6 @@ class HttpWorker {
 
   async start() {
     const config = this.getConfig();
-    const loop = this.getLoop();
-    const logger = this.getLogger();
     const workerId = this.getWorkerId();
     const doJob = this.getDoJob();
 

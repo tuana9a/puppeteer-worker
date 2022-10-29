@@ -1,19 +1,15 @@
 const fs = require("fs");
 const path = require("path");
 const ScheduleDirNotExistsError = require("../errors/ScheduleDirNotExistError");
+const loop = require("../common/loop");
+const logger = require("../loggers/logger");
 
 class StandaloneWorker {
   config;
 
-  loop;
-
-  logger;
-
   doJob;
 
   async start() {
-    const loop = this.getLoop();
-    const logger = this.getLogger();
     const doJob = this.getDoJob();
     const dir = this.config.scheduleDir;
 

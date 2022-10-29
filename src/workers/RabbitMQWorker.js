@@ -1,6 +1,7 @@
 const amqp = require("amqplib/callback_api");
 const toPrettyErr = require("../common/toPrettyErr");
 const toBuffer = require("../common/toBuffer");
+const logger = require("../loggers/logger");
 
 const NEW_JOB = "jobs.new";
 const JOB_RESULT = "jobs.result";
@@ -11,8 +12,6 @@ const PING = "ping";
 class RabbitMQWorker {
   config;
 
-  logger;
-
   doJob;
 
   puppeteerClient;
@@ -22,7 +21,6 @@ class RabbitMQWorker {
   }
 
   start() {
-    const logger = this.getLogger();
     const config = this.getConfig();
     const workerId = this.getWorkerId();
     const doJob = this.getDoJob();

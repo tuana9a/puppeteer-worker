@@ -29,6 +29,7 @@
     "amqplib": "^0.10.3",
     "axios": "0.25.0",
     "form-data": "4.0.0",
+    "moment": "^2.29.4",
     "puppeteer": "13.5.1",
     "puppeteer-worker-job-builder": "^1.2.0",
     "yargs": "17.5.1"

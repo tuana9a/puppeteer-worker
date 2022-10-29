@@ -1,9 +1,7 @@
 // eslint-disable-next-line import/no-unresolved
 const { IOCContainer } = require("@tuana9a/nanioc");
 
-const Loop = require("./common/Loop");
 const DoJob = require("./controllers/DoJob");
-const Logger = require("./common/Logger");
 const DateTimeUtils = require("./utils/DateTimeUtils");
 const Config = require("./common/Config");
 const PuppeteerClient = require("./controllers/PuppeteerClient");
@@ -16,13 +14,11 @@ const PuppeteerDisconnectedError = require("./errors/PuppeteerDisconnectedError"
 
 async function launch(config) {
   const ioc = new IOCContainer({ getter: true });
-  ioc.addBean(Logger, "logger", { ignoreDeps: ["logDir", "handler", "handlers"] });
   ioc.addBean(DateTimeUtils, "datetimeUtils");
   ioc.addBean(Config, "config", { ignoreDeps: ["__all"] });
   ioc.addBean(PuppeteerClient, "puppeteerClient");
   ioc.addBean(DoJob, "doJob");
   ioc.addBean(JobTemplateDb, "jobTemplateDb", { ignoreDeps: ["db"] });
-  ioc.addBean(Loop, "loop");
   ioc.addBean(WorkerController, "workerController");
   ioc.addBean(HttpWorker, "httpWorker");
   ioc.addBean(RabbitMQWorker, "rabbitWorker", { ignoreDeps: ["workerId"] });

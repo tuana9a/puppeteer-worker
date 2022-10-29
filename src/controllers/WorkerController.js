@@ -1,9 +1,8 @@
 const ensureDirExists = require("../common/ensureDirExists");
 const InvalidWorkerTypeError = require("../errors/InvalidWorkerTypeError");
+const logger = require("../loggers/logger");
 
 class WorkerController {
-  logger;
-
   config;
 
   jobTemplateDb;
@@ -18,7 +17,6 @@ class WorkerController {
 
   loadConfig(_config) {
     if (_config) {
-      const logger = this.getLogger();
       const config = this.getConfig();
       if (_config.configFile) {
         config.updateFromFile(_config.configFile);

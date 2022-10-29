@@ -3,11 +3,10 @@
 const fs = require("fs");
 const path = require("path");
 const JobDirNotExistsError = require("../errors/JobDirNotExistError");
+const logger = require("../loggers/logger");
 
 class JobTemplateDb {
   db;
-
-  logger;
 
   constructor() {
     this.db = new Map();
@@ -25,7 +24,6 @@ class JobTemplateDb {
    */
   loadFromFile(filepath, jobName) {
     const db = this.getDb();
-    const logger = this.getLogger();
     try {
       const jobTemplate = require(filepath);
       db.set(jobName, jobTemplate);

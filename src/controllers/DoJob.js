@@ -8,8 +8,6 @@ const InvalidJobError = require("../errors/InvalidJobError");
 const axios = _axios.default.create();
 
 class DoJob {
-  logger;
-
   puppeteerClient;
 
   jobTemplateDb;
