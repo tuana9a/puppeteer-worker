@@ -4,16 +4,15 @@ const downloadFile = require("../common/downloadFile");
 const toPrettyErr = require("../common/toPrettyErr");
 const loop = require("../common/loop");
 const logger = require("../loggers/logger");
+const config = require("../common/config");
 
 const axios = _axios.default.create();
 
 class HttpWorker {
-  config;
-
   doJob;
 
   getWorkerId() {
-    return this.config.workerId;
+    return config.workerId;
   }
 
   async downloadJobs(url, jobDir, headers = {}) {
@@ -40,7 +39,6 @@ class HttpWorker {
   }
 
   async start() {
-    const config = this.getConfig();
     const workerId = this.getWorkerId();
     const doJob = this.getDoJob();
 

@@ -3,7 +3,6 @@ const { IOCContainer } = require("@tuana9a/nanioc");
 
 const DoJob = require("./controllers/DoJob");
 const DateTimeUtils = require("./utils/DateTimeUtils");
-const Config = require("./common/Config");
 const PuppeteerClient = require("./controllers/PuppeteerClient");
 const JobTemplateDb = require("./db/JobTemplateDb");
 const WorkerController = require("./controllers/WorkerController");
@@ -15,7 +14,6 @@ const PuppeteerDisconnectedError = require("./errors/PuppeteerDisconnectedError"
 async function launch(config) {
   const ioc = new IOCContainer({ getter: true });
   ioc.addBean(DateTimeUtils, "datetimeUtils");
-  ioc.addBean(Config, "config", { ignoreDeps: ["__all"] });
   ioc.addBean(PuppeteerClient, "puppeteerClient");
   ioc.addBean(DoJob, "doJob");
   ioc.addBean(JobTemplateDb, "jobTemplateDb", { ignoreDeps: ["db"] });

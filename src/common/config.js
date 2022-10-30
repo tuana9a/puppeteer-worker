@@ -80,4 +80,6 @@ class Config {
   }
 }
 
-module.exports = Config;
+const config = new Config();
+
+module.exports = config;

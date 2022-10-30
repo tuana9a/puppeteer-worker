@@ -1,10 +1,9 @@
+const config = require("../common/config");
 const ensureDirExists = require("../common/ensureDirExists");
 const InvalidWorkerTypeError = require("../errors/InvalidWorkerTypeError");
 const logger = require("../loggers/logger");
 
 class WorkerController {
-  config;
-
   jobTemplateDb;
 
   httpWorker;
@@ -17,7 +16,6 @@ class WorkerController {
 
   loadConfig(_config) {
     if (_config) {
-      const config = this.getConfig();
       if (_config.configFile) {
         config.updateFromFile(_config.configFile);
       }
@@ -29,13 +27,11 @@ class WorkerController {
   }
 
   prepareWorkDirs() {
-    const config = this.getConfig();
     ensureDirExists(config.tmpDir);
     ensureDirExists(config.logDir);
   }
 
   prepareJobTemplate() {
-    const config = this.getConfig();
     const jobTemplateDb = this.getJobTemplateDb();
     jobTemplateDb.loadFromDir(config.jobDir);
   }
@@ -45,10 +41,10 @@ class WorkerController {
   }
 
   auto() {
-    if (!this[this.config.workerType]) {
-      throw new InvalidWorkerTypeError(this.config.workerType);
+    if (!this[config.workerType]) {
+      throw new InvalidWorkerTypeError(config.workerType);
     }
-    return this[this.config.workerType]();
+    return this[config.workerType]();
   }
 
   rabbit() {

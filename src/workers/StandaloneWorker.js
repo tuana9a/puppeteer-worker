@@ -3,15 +3,14 @@ const path = require("path");
 const ScheduleDirNotExistsError = require("../errors/ScheduleDirNotExistError");
 const loop = require("../common/loop");
 const logger = require("../loggers/logger");
+const config = require("../common/config");
 
 class StandaloneWorker {
-  config;
-
   doJob;
 
   async start() {
     const doJob = this.getDoJob();
-    const dir = this.config.scheduleDir;
+    const dir = config.scheduleDir;
 
     if (!fs.existsSync(dir)) {
       throw new ScheduleDirNotExistsError(dir);

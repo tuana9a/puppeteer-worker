@@ -1,10 +1,9 @@
 const puppeteer = require("puppeteer");
+const config = require("../common/config");
 
 class PuppeteerClient {
-  config;
-
   async launch() {
-    this.browser = await puppeteer.launch(this.config.puppeteerLaunchOption);
+    this.browser = await puppeteer.launch(config.puppeteerLaunchOption);
     return this;
   }
 
