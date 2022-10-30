@@ -15,12 +15,7 @@ class RabbitMQWorker {
 
   puppeteerClient;
 
-  getWorkerId() {
-    return config.workerId;
-  }
-
   start() {
-    const workerId = this.getWorkerId();
     const doJob = this.getDoJob();
 
     amqp.connect(config.rabbitmqConnectionString, (error0, connection) => {
@@ -33,7 +28,7 @@ class RabbitMQWorker {
           logger.error(error1);
           return;
         }
-        const doing = (data) => channel.publish(WORKER_FEEDBACK, DOING, toBuffer({ workerId: workerId, data: data }));
+        const doing = (data) => channel.publish(WORKER_FEEDBACK, DOING, toBuffer({ workerId: config.workerId, data: data }));
 
         channel.prefetch(1);
         channel.assertExchange(WORKER_FEEDBACK, "topic", { durable: false });
@@ -51,13 +46,13 @@ class RabbitMQWorker {
               const logs = await doJob.do(job);
               channel.sendToQueue(JOB_RESULT, toBuffer({
                 id: job.id,
-                workerId: workerId,
+                workerId: config.workerId,
                 logs: logs,
               }));
             } catch (err) {
               logger.error(err);
               channel.sendToQueue(JOB_RESULT, toBuffer({
-                workerId: workerId,
+                workerId: config.workerId,
                 err: toPrettyErr(err),
               }));
             }
@@ -65,7 +60,7 @@ class RabbitMQWorker {
           }, { noAck: false });
         });
         setInterval(() => {
-          channel.publish(WORKER_FEEDBACK, PING, toBuffer({ workerId: workerId }));
+          channel.publish(WORKER_FEEDBACK, PING, toBuffer({ workerId: config.workerId }));
         }, 3000);
       });
     });

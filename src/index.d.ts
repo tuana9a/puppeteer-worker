@@ -49,10 +49,6 @@ class PuppeteerClient {
 }
 
 class RabbitMQWorker {
-  constructor();
-
-  getWorkerId(): string;
-
   start(): void;
 }
 
@@ -66,7 +62,6 @@ class StandaloneWorker {
 }
 
 class WorkerController {
-  constructor();
   loadConfig(_config?: Config): void;
   prepareWorkDirs(): void;
   prepareJobTemplate(): void;

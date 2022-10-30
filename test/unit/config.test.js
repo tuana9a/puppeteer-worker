@@ -1,8 +1,7 @@
-const Config = require("../../src/common/Config");
+const config = require("../../src/common/config");
 
 describe("test config", () => {
   test("should match default value", () => {
-    const config = new Config();
     config.setDefaultIfFalsy();
     expect(config.toSimpleObject()).toEqual({
       configFile: undefined,
@@ -13,6 +12,7 @@ describe("test config", () => {
       logDir: "./logs/",
       secret: undefined,
       jobDir: "./jobs/",
+      scheduleDir: "./schedules/",
       accessToken: undefined,
       httpWorkerPullConfigUrl: undefined,
       rabbitmqConnectionString: undefined,
@@ -29,7 +29,6 @@ describe("test config", () => {
   });
 
   test("should match updated value", () => {
-    const config = new Config();
     config.updateFromObject({
       tmpDir: "otherTmpDir",
       secret: "iloveyou",
@@ -37,12 +36,15 @@ describe("test config", () => {
       puppeteerMode: "visible",
     });
     expect(config.toSimpleObject()).toEqual({
+      workerType: "http",
+      workerId: expect.any(String),
       configFile: undefined,
       tmpDir: "otherTmpDir",
-      logDest: undefined,
-      logDir: undefined,
+      logDest: "cs",
+      logDir: "./logs/",
       secret: "iloveyou",
-      jobDir: undefined,
+      jobDir: "./jobs/",
+      scheduleDir: "./schedules/",
       accessToken: undefined,
       httpWorkerPullConfigUrl: undefined,
       rabbitmqConnectionString: undefined,
