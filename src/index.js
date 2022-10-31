@@ -1,5 +1,4 @@
-// eslint-disable-next-line import/no-unresolved
-const { IOCContainer } = require("@tuana9a/nanioc");
+const { IocContainer } = require("tu9nioc/dist");
 
 const DoJob = require("./controllers/DoJob");
 const PuppeteerClient = require("./controllers/PuppeteerClient");
@@ -11,7 +10,7 @@ const StandaloneWorker = require("./workers/StandaloneWorker");
 const PuppeteerDisconnectedError = require("./errors/PuppeteerDisconnectedError");
 
 async function launch(config) {
-  const ioc = new IOCContainer({ getter: true });
+  const ioc = new IocContainer({ getter: true });
   ioc.addBean(PuppeteerClient, "puppeteerClient");
   ioc.addBean(DoJob, "doJob");
   ioc.addBean(JobTemplateDb, "jobTemplateDb", { ignoreDeps: ["db"] });

@@ -25,13 +25,13 @@
   },
   "homepage": "https://github.com/tuana9a/puppeteer-worker#readme",
   "dependencies": {
-    "@tuana9a/nanioc": "^0.3.3",
     "amqplib": "^0.10.3",
     "axios": "0.25.0",
     "form-data": "4.0.0",
     "moment": "^2.29.4",
     "puppeteer": "13.5.1",
     "puppeteer-worker-job-builder": "^1.2.0",
+    "tu9nioc": "^1.0.2",
     "yargs": "17.5.1"
   },
   "devDependencies": {
