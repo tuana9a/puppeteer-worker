@@ -1,10 +1,8 @@
 .vscode/
-jobs/
-logs/
-test/
-tmp/
-schedules/
 .env
 Dockerfile
 nodemon.json
 config.json
+tests/
+test/
+src/
