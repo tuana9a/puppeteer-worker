@@ -1,21 +1,20 @@
-import { ActionLog, Context } from "puppeteer-worker-job-builder/v1";
-import toPrettyErr from "./utils/toPrettyErr";
+import { ActionLog, Context, toPrettyErr } from "puppeteer-worker-job-builder/v1";
 
 export default async function RunContext(context: Context) {
   let action = context.stacks.pop();
-  let currentStepIdx = 0;
   while (action && !context.isBreak) {
     const actionName = action.getName();
     try {
-      context.currentStepIdx = currentStepIdx;
       action.withContext(context); // WARN: mem leak context -> action, action -> context
-      action.setStepIdx(currentStepIdx);
+      action.setStepIdx(context.currentStepIdx);
       action.setNestingLevel(context.currentNestingLevel);
 
-      context._onDoing({
-        job: context.jobName,
+      context.doing({
+        job: context.job,
         action: actionName,
-        stacks: context.stacks.map((x) => x.getName()),
+        stepIdx: action.stepIdx,
+        nestingLevel: action.nestingLevel,
+        stacks: Array.from(context.stacks).map((x) => x.getName()).reverse(),
         at: Date.now(),
       });
 
@@ -23,9 +22,9 @@ export default async function RunContext(context: Context) {
       await action.run();
 
       action = context.stacks.pop();
-      currentStepIdx += 1;
+      context.currentStepIdx += 1;
     } catch (error) {
-      context.logs.push(new ActionLog({ action: actionName, error: toPrettyErr(error) }));
+      context.logs.push(new ActionLog().fromAction(action).withError(toPrettyErr(error)));
       context.isBreak = true;
     }
   }
