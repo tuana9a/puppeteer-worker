@@ -13,20 +13,18 @@ export default class PuppeteerWorker {
     onDoing?: (info: DoingInfo) => Promise<any>;
   }) {
     const context = new Context({
-      jobName: job.name,
+      job: job.name,
       page: ctx.page,
       libs: ctx.libs,
       params: ctx.params,
-      _onDoing: ctx.onDoing || (() => null),
       currentStepIdx: 0,
       currentNestingLevel: 0,
       isBreak: false,
       logs: [],
-      outputs: [],
       runContext: RunContext,
       stacks: Array.from(job.actions).reverse(),
-      actionsToDestroy: [],
     });
+    context.onDoing(ctx.onDoing || (() => null));
     const logs = await RunContext(context);
     return logs;
   }
