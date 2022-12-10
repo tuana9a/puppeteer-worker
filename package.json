@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/tuana9a/puppeteer-worker#readme",
   "dependencies": {
-    "puppeteer-worker-job-builder": "^2.0.0-a.1"
+    "puppeteer-worker-job-builder": "^2.0.0-a.2"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.40.0",
