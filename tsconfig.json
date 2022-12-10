@@ -3,13 +3,13 @@
     "target": "ES2021",
     "module": "CommonJS",
     "rootDir": "./src",
-    "outDir": "."
+    "outDir": "./dist"
   },
   "include": [
     "./src/**/*.ts"
   ],
   "exclude": [
     "node_modules/",
-    "v1/"
+    "dist/"
   ]
 }
