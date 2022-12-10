@@ -1,7 +1,9 @@
 {
   "name": "puppeteer-worker",
-  "version": "2.1.1",
+  "version": "3.0.0-a.1",
   "description": "Simple puppeteer-worker run job",
+  "main": "./dist/index.js",
+  "exports": "./dist/index.js",
   "scripts": {
     "build": "tsc --declaration",
     "build:watch": "tsc --watch --declaration",
@@ -18,7 +20,7 @@
   },
   "homepage": "https://github.com/tuana9a/puppeteer-worker#readme",
   "dependencies": {
-    "puppeteer-worker-job-builder": "^1.3.1"
+    "puppeteer-worker-job-builder": "^2.0.0-a.2"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.40.0",

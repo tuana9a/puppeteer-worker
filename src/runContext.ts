@@ -1,6 +1,6 @@
-import { ActionLog, Context, toPrettyErr } from "puppeteer-worker-job-builder/v1";
+import { ActionLog, Context, toPrettyErr } from "puppeteer-worker-job-builder";
 
-export default async function RunContext(context: Context) {
+export default async function runContext(context: Context) {
   let action = context.stacks.pop();
   while (action && !context.isBreak) {
     const actionName = action.getName();
