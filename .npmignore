@@ -6,3 +6,5 @@ config.json
 tests/
 test/
 src/
+*test.d*
+*tests.d*

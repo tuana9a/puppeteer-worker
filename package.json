@@ -21,7 +21,7 @@
   "homepage": "https://github.com/tuana9a/puppeteer-worker#readme",
   "dependencies": {
     "puppeteer-core": "^13.5.1",
-    "puppeteer-worker-job-builder": "^2.1.1"
+    "puppeteer-worker-job-builder": "^2.1.2"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.47.1",
