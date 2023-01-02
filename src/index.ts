@@ -1,3 +1,8 @@
 import PuppeteerWorker from "./PuppeteerWorker";
+import runContext from "./runContext";
 
-export default PuppeteerWorker;
+export * from "./utils";
+export {
+  PuppeteerWorker,
+  runContext,
+};

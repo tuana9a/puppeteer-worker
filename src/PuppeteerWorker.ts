@@ -1,31 +1,44 @@
-import { Job, DoingInfo, Context } from "puppeteer-worker-job-builder";
+import { Browser } from "puppeteer-core";
+import { Context, Job, OnDoing } from "puppeteer-worker-job-builder";
 import runContext from "./runContext";
 
 export default class PuppeteerWorker {
-  async do(job: Job, ctx: {
-    page: any;
+  constructor(private browser?: Browser) { }
 
-    libs: any;
+  setBrowser(browser: Browser) {
+    this.browser = browser;
+  }
 
-    params: any;
+  getBrowser() {
+    return this.browser;
+  }
 
-    // eslint-disable-next-line no-unused-vars
-    onDoing?: (info: DoingInfo) => Promise<any>;
-  }) {
+  async getPage(index: number) {
+    const pages = await this.browser.pages();
+    return pages[index];
+  }
+
+  async getFirstPage() {
+    return this.getPage(0);
+  }
+
+  async do(job: Job, opts: { pageIndex?: number; onDoing?: OnDoing } = { pageIndex: 0, onDoing: () => null }) {
+    const page = await this.getPage(opts?.pageIndex || 0);
     const context = new Context({
       job: job.name,
-      page: ctx.page,
-      libs: ctx.libs,
-      params: ctx.params,
+      page: page,
+      libs: job.libs,
+      params: job.params,
       currentStepIdx: 0,
       currentNestingLevel: 0,
       isBreak: false,
       logs: [],
       runContext: runContext,
       stacks: Array.from(job.actions).reverse(),
+      doing: opts?.onDoing,
     });
-    context.onDoing(ctx.onDoing || (() => null));
-    const logs = await runContext(context);
-    return logs;
+    await runContext(context);
+    const { logs, vars } = context;
+    return { logs, vars };
   }
 }

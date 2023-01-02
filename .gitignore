@@ -104,8 +104,4 @@ dist
 .tern-port
 
 # @tuana9a
-/jobs/
-/tmp/
-/config.json
-/schedules/
-/v1/
+*tmp*

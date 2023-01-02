@@ -18,7 +18,9 @@ export default async function runContext(context: Context) {
         at: Date.now(),
       });
 
-      // trust action do whatever it does =))
+      // trust action do whatever it does
+      // even recursively call runContext again
+      // or destroy context
       await action.run();
 
       action = context.stacks.pop();
@@ -28,7 +30,8 @@ export default async function runContext(context: Context) {
       context.isBreak = true;
     }
   }
-  const { logs } = context;
-  context.destroy();
-  return logs;
+
+  // destroy after return logs or will lost logs
+  setTimeout(() => context.destroy(), 1000);
+  return context.logs;
 }
