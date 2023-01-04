@@ -15,26 +15,28 @@ const {
   Job,
   IsEqual,
   CurrentUrl,
+  Break,
 } = require("puppeteer-worker-job-builder");
 
 const supplier = () => new Job({
-  name: "TestLoop2",
+  name: "TestLoopBreakedByIf",
   actions: [
     For([
-      ["https://youtube.com", "https://twitter.com"],
-      ["https://facebook.com", "https://reddit.com"],
+      ["https://genpasswd1.tuana9a.com", "https://genpasswd2.tuana9a.com"],
+      ["https://genpasswd3.tuana9a.com", "https://genpasswd4.tuana9a.com"],
     ]).Each([
-      (x) => For(x).Each([
-        (x1) => GoTo(x1),
+      (urls) => For(urls).Each([
+        (url) => GoTo(url),
         WaitForTimeout(1000),
-        // Only youtube and facebook is logged
-        If(IsEqual(CurrentUrl(), "https://www.youtube.com/")).Then([
-          BreakPoint(),
+        // Only genpasswd2 and genpasswd4 is logged
+        If(IsEqual(CurrentUrl(), "https://www.genpasswd1.tuana9a.com/")).Then([
+          Break(),
         ]),
-        If(IsEqual(CurrentUrl(), "https://www.facebook.com/")).Then([
-          BreakPoint(),
+        If(IsEqual(CurrentUrl(), "https://www.genpasswd3.tuana9a.com/")).Then([
+          Break(),
         ]),
-        (x1) => ScreenShot(null, `./tmp/${x1.replace(/\W+/g, "_")}.png`, "png"),
+        // No ScreenShot taken because of break
+        (url) => ScreenShot(null, `./tmp/${url.replace(/\W+/g, "_")}.png`, "png"),
       ]),
     ]),
   ],

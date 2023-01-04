@@ -10,26 +10,29 @@ const {
   // GetValueFromParams,
   ScreenShot,
   // If,
-  // BreakPoint,
+  BreakPoint,
   // GetTextContent,
   Job,
+  Break,
 } = require("puppeteer-worker-job-builder");
 
-supplier = () => new Job({
-  name: "TestLoopNested",
+const supplier = () => new Job({
+  name: "TestLoop2",
   actions: [
     For([
       ["https://genpasswd1.tuana9a.com", "https://genpasswd2.tuana9a.com"],
-      ["https://genpasswd3.tuana9a.com", "https://genpasswd4.tuana9a.com"]
+      ["https://genpasswd3.tuana9a.com", "https://genpasswd4.tuana9a.com"],
     ]).Each([
-      (urls) => For(urls).Each([
-        (url) => GoTo(url),
+      (x) => For(x).Each([
+        (x1) => GoTo(x1),
         WaitForTimeout(1000),
-        (url) => ScreenShot(null, `./tmp/${url.replace(/\W+/g, "_")}.png`, "png"),
+        Break(), // Only genpasswd1 and genpasswd3
+        (x1) => ScreenShot(null, `./tmp/${x1.replace(/\W+/g, "_")}.png`, "png"),
       ]),
     ]),
   ],
 });
+
 
 async function main() {
   const browser = await puppeteer.launch({
@@ -45,13 +48,16 @@ async function main() {
 
   const puppeteerWorker = new PuppeteerWorker(browser);
 
-  let job = supplier();
+  for (let i = 0; i < 10_000; i++) {
+    console.log(i);
+    let job = supplier();
 
-  job.params = {};
-  job.libs = {};
+    job.params = {};
+    job.libs = {};
 
-  const output = await puppeteerWorker.do(job);
-  console.log(JSON.stringify(output, null, 2));
+    const output = await puppeteerWorker.do(job);
+  }
+  // console.log(JSON.stringify(output, null, 2));
 }
 
 main();

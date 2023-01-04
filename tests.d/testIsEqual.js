@@ -13,15 +13,26 @@ const {
   // BreakPoint,
   // GetTextContent,
   Job,
+  If,
+  IsEqual,
+  IsStrictEqual,
 } = require("puppeteer-worker-job-builder");
 
 const supplier = () => new Job({
-  name: "TestLoopWithParams",
+  name: "TestIsEqual",
   actions: [
-    For(GetValueFromParams((x) => x.urls)).Each([
-      (x) => GoTo(x),
+    For(GetValueFromParams((params) => params.urls)).Each([
+      (url) => GoTo(url),
       WaitForTimeout(1000),
-      (x) => ScreenShot(null, `./tmp/${x.replace(/\W+/g, "_")}.png`, "png"),
+      (url) => If(url == "https://genpasswd1.tuana9a.com").Then([
+        ScreenShot(null, `./tmp/${url.replace(/\W+/g, "_")}.png`, "png"),
+      ]),
+      (url) => If(IsEqual(url, "https://genpasswd2.tuana9a.com")).Then([
+        ScreenShot(null, `./tmp/${url.replace(/\W+/g, "_")}.png`, "png"),
+      ]),
+      (url) => If(IsStrictEqual(url, "https://genpasswd3.tuana9a.com")).Then([
+        ScreenShot(null, `./tmp/${url.replace(/\W+/g, "_")}.png`, "png"),
+      ]),
     ]),
   ],
 });
@@ -42,7 +53,14 @@ async function main() {
 
   let job = supplier();
 
-  job.params = { urls: ["https://genpasswd.tuana9a.com", "https://genpasswd1.tuana9a.com"] };
+  job.params = {
+    urls: [
+      "https://genpasswd.tuana9a.com",
+      "https://genpasswd1.tuana9a.com",
+      "https://genpasswd2.tuana9a.com",
+      "https://genpasswd3.tuana9a.com",
+    ]
+  };
   job.libs = {};
 
   const output = await puppeteerWorker.do(job);

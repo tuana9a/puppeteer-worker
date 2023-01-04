@@ -9,25 +9,25 @@ const {
   // Click,
   // GetValueFromParams,
   ScreenShot,
-  // If,
-  // BreakPoint,
+  If,
+  BreakPoint,
   // GetTextContent,
   Job,
+  IsEqual,
+  CurrentUrl,
+  Break,
 } = require("puppeteer-worker-job-builder");
 
-supplier = () => new Job({
-  name: "TestLoopNested",
+const supplier = () => new Job({
+  name: "TestIfThenBreak",
   actions: [
-    For([
-      ["https://genpasswd1.tuana9a.com", "https://genpasswd2.tuana9a.com"],
-      ["https://genpasswd3.tuana9a.com", "https://genpasswd4.tuana9a.com"]
-    ]).Each([
-      (urls) => For(urls).Each([
-        (url) => GoTo(url),
-        WaitForTimeout(1000),
-        (url) => ScreenShot(null, `./tmp/${url.replace(/\W+/g, "_")}.png`, "png"),
-      ]),
+    GoTo("https://genpasswd1.tuana9a.com/"),
+    WaitForTimeout(1000),
+    If(true).Then([
+      Break(),
     ]),
+    // No ScreenShot taken
+    ScreenShot(null, "./tmp/I-am-invisible.png", "png")
   ],
 });
 

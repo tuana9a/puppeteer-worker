@@ -13,19 +13,21 @@ const {
   BreakPoint,
   // GetTextContent,
   Job,
+  Break,
 } = require("puppeteer-worker-job-builder");
 
 const supplier = () => new Job({
-  name: "TestLoop2",
+  name: "TestLoopBreaked",
   actions: [
     For([
-      ["https://youtube.com", "https://twitter.com"],
-      ["https://facebook.com", "https://reddit.com"],
+      ["https://genpasswd1.tuana9a.com", "https://genpasswd2.tuana9a.com"],
+      ["https://genpasswd3.tuana9a.com", "https://genpasswd4.tuana9a.com"],
     ]).Each([
       (x) => For(x).Each([
         (x1) => GoTo(x1),
         WaitForTimeout(1000),
-        BreakPoint(), // Only youtube and facebook is logged
+        Break(), // Only genpasswd1 and genpasswd3
+        // No ScreenShot taken because of break
         (x1) => ScreenShot(null, `./tmp/${x1.replace(/\W+/g, "_")}.png`, "png"),
       ]),
     ]),

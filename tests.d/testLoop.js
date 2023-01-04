@@ -18,12 +18,7 @@ const {
 const supplier = () => new Job({
   name: "TestLoop",
   actions: [
-    For(["https://google.com", "https://facebook.com"]).Each([
-      (x) => GoTo(x),
-      WaitForTimeout(1000),
-      (x) => ScreenShot(null, `./tmp/${x.replace(/\W+/g, "_")}.png`, "png"),
-    ]),
-    For(GetValueFromParams((x) => x.urls)).Each([
+    For(["https://genpasswd.tuana9a.com", "https://genpasswd1.tuana9a.com"]).Each([
       (x) => GoTo(x),
       WaitForTimeout(1000),
       (x) => ScreenShot(null, `./tmp/${x.replace(/\W+/g, "_")}.png`, "png"),
