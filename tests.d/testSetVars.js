@@ -14,15 +14,18 @@ const {
   GetTextContent,
   Job,
   SetVars,
+  CurrentUrl,
 } = require("puppeteer-worker-job-builder");
 
 const supplier = () => new Job({
   name: "testSetVars",
   actions: [
     SetVars(x => (x.urls = [])),
+    SetVars("tuan.dep.trai", "vodich"),
     For(GetValueFromParams((x) => x.urls)).Each([
       (x) => GoTo(x),
       WaitForTimeout(1000),
+      SetVars("tuan.dep.trai", CurrentUrl()),
       (x) => ScreenShot(null, `./tmp/${x.replace(/\W+/g, "_")}.png`, "png"),
       (x) => If(GetValueFromParams(x => x)).Then([
         SetVars(x1 => x1.urls.push(x))
@@ -47,7 +50,7 @@ async function main() {
 
   let job = supplier();
 
-  job.params = { urls: ["https://twitter.com", "https://tuana9a.cronitorstatus.com/"] };
+  job.params = { urls: ["https://genpasswd.tuana9a.com", "https://tuana9a.cronitorstatus.com/"] };
   job.libs = {};
 
   const output = await puppeteerWorker.do(job);
